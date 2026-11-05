@@ -2,9 +2,9 @@
 
 ## 1. Project toolchain
 
-- [ ] 1.1 Create the Vite, strict TypeScript, ESLint, and Vitest configuration plus `package.json` scripts (`dev`, `lint`, `typecheck`, `test`, `build`); verify dependencies install with `npm install`.
-- [ ] 1.2 Add the React application entry point, global responsive layout styles, and a README development section; verify `npm run dev` starts the application.
-- [ ] 1.3 Add a focused Vitest test for a pure bootstrap helper and verify it passes with `npm run test`.
+- [x] 1.1 Create the Vite, strict TypeScript, ESLint, and Vitest configuration plus `package.json` scripts (`dev`, `lint`, `typecheck`, `test`, `build`); verify dependencies install with `npm install`.
+- [x] 1.2 Add the React application entry point, global responsive layout styles, and a README development section; verify `npm run dev` starts the application.
+- [x] 1.3 Add a focused Vitest test for a pure bootstrap helper and verify it passes with `npm run test`.
 
 ## 2. Phaser browser shell
 
