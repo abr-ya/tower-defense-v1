@@ -1,0 +1,32 @@
+# Dependencies
+/node_modules/
+
+# Vite production output and test coverage
+/dist/
+/coverage/
+
+# Local environment files; commit a sanitized .env.example when needed
+.env*
+!.env.example
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# TypeScript incremental-build metadata
+*.tsbuildinfo
+
+# Secrets and OS metadata
+*.pem
+.DS_Store
+
+# Local editor and agent settings
+.agents/
+.claude/
+.cursor/
+.opencode/
+.idea/
+.vscode/
+.codex/
