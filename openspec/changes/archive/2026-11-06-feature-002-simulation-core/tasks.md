@@ -12,8 +12,8 @@
 
 ## 3. Integration verification
 
-- [ ] 3.1 Run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`; verify every command exits successfully.
-- [ ] 3.2 Update `docs/BACKLOG.md` to `IN PROGRESS` after the automated checks pass; verify it remains `IN PROGRESS` until the OpenSpec change is archived.
+- [x] 3.1 Run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`; verify every command exits successfully.
+- [x] 3.2 Update `docs/BACKLOG.md` to `IN PROGRESS` after the automated checks pass; verify it remains `IN PROGRESS` until the OpenSpec change is archived.
 
 ## Workflow follow-up
 
