@@ -8,9 +8,9 @@
 
 ## 2. Phaser browser shell
 
-- [ ] 2.1 Implement a React-owned game host and a Phaser adapter that creates one neutral placeholder scene and destroys the `Game` instance during component cleanup; verify the application loads without console errors through `npm run dev`.
-- [ ] 2.2 Implement host-based Phaser canvas resizing without coupling viewport pixels to future logical world coordinates; verify desktop resizing keeps the canvas within its host without reloading.
-- [ ] 2.3 Add a landscape mobile-safe layout that prevents horizontal page overflow; verify with browser device emulation or a touch-enabled landscape browser.
+- [x] 2.1 Implement a React-owned game host and a Phaser adapter that creates one neutral placeholder scene and destroys the `Game` instance during component cleanup; verify the application loads without console errors through `npm run dev`.
+- [x] 2.2 Implement host-based Phaser canvas resizing without coupling viewport pixels to future logical world coordinates; verify desktop resizing keeps the canvas within its host without reloading.
+- [x] 2.3 Add a landscape mobile-safe layout that prevents horizontal page overflow; verify with browser device emulation or a touch-enabled landscape browser.
 
 ## 3. Integration verification
 
