@@ -32,6 +32,8 @@ body {
   display: grid;
   width: min(100%, 1280px);
   height: min(72dvh, 720px);
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
   border: 2px solid #4f6cae;
   border-radius: 1rem;
@@ -43,11 +45,17 @@ body {
   position: relative;
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .phaser-canvas-host {
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .phaser-canvas-host canvas {
