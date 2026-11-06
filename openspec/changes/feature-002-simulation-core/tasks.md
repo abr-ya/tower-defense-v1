@@ -2,8 +2,8 @@
 
 ## 1. Core session and fixed clock
 
-- [ ] 1.1 Add pure simulation types, fixed-step constants, a session factory, and a public `src/game/core` export; verify `npm run typecheck` succeeds without imports from Phaser, React, DOM, or platform modules.
-- [ ] 1.2 Implement accumulator-based advancement at 1/60 second with a five-tick catch-up cap and integer tick-derived simulation time; verify focused Vitest cases cover partial elapsed time, a single tick, multiple ticks, and capped long frames.
+- [x] 1.1 Add pure simulation types, fixed-step constants, a session factory, and a public `src/game/core` export; verify `npm run typecheck` succeeds without imports from Phaser, React, DOM, or platform modules.
+- [x] 1.2 Implement accumulator-based advancement at 1/60 second with a five-tick catch-up cap and integer tick-derived simulation time; verify focused Vitest cases cover partial elapsed time, a single tick, multiple ticks, and capped long frames.
 
 ## 2. Lifecycle and deterministic behavior
 
