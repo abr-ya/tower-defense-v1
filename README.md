@@ -33,3 +33,21 @@ Gameplay simulation remains independent from rendering, browser APIs, and persis
 - Desktop packaging for Windows and Linux after browser gameplay is stable
 
 See [`docs/PROJECT.md`](docs/PROJECT.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), and [`docs/BACKLOG.md`](docs/BACKLOG.md) for the current product, technical, and delivery details.
+
+## Development
+
+Use Node.js LTS (the repository is tested with Node 24) and install dependencies:
+
+```bash
+nvm use --lts
+npm install
+```
+
+Run the application locally with `npm run dev`. Before submitting a change, run:
+
+```bash
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+```

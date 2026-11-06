@@ -21,7 +21,7 @@ Status: initial planning | Updated: 2026-11-04
 ## Prioritized backlog
 | ID | Milestone | Priority | Status | Item / OpenSpec change | Acceptance criteria |
 |---|---|---|---|---|---|
-| feature-001 | M0 | High | READY | Bootstrap Vite/React/Phaser/TS and OpenSpec (`feature-001-bootstrap-game`) | Local browser shows responsive game canvas; scripts for lint, typecheck, test, build work |
+| feature-001 | M0 | High | DONE | Bootstrap Vite/React/Phaser/TS and OpenSpec (`feature-001-bootstrap-game`) | Local browser shows responsive game canvas; scripts for lint, typecheck, test, build work |
 | feature-002 | M0 | High | TODO | Pure TS simulation loop (`feature-002-simulation-core`) | Fixed-step update, state/commands, pause; unit tests independent of Phaser |
 | feature-003 | M1 | High | TODO | Level and route loading (`feature-003-level-route`) | One authored map; enemy follows waypoints at stable speed |
 | feature-004 | M1 | High | TODO | Placement preview and validation (`feature-004-tower-placement`) | Valid cells highlighted; invalid cells rejected; mouse/touch input |
