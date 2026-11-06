@@ -2,8 +2,8 @@
 
 ## 1. Authored level and pure route traversal
 
-- [ ] 1.1 Add typed level and waypoint definitions plus one prototype level with logical bounds, a winding route, and an authored movement speed. Verify that route validation accepts the prototype and rejects fewer than two waypoints, out-of-bounds waypoints, and zero-length segments.
-- [ ] 1.2 Implement pure cumulative-distance traversal that maps elapsed travel distance to an enemy position and completion state. Extend the simulation session and immutable snapshot to expose the prototype enemy while preserving pause, resume, and restart behavior. Verify focused unit tests cover stable speed, waypoint crossing, completion clamping, restart, and deterministic equivalent sessions.
+- [x] 1.1 Add typed level and waypoint definitions plus one prototype level with logical bounds, a winding route, and an authored movement speed. Verify that route validation accepts the prototype and rejects fewer than two waypoints, out-of-bounds waypoints, and zero-length segments.
+- [x] 1.2 Implement pure cumulative-distance traversal that maps elapsed travel distance to an enemy position and completion state. Extend the simulation session and immutable snapshot to expose the prototype enemy while preserving pause, resume, and restart behavior. Verify focused unit tests cover stable speed, waypoint crossing, completion clamping, restart, and deterministic equivalent sessions.
 
 ## 2. Phaser visualization
 
