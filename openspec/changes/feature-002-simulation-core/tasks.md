@@ -7,8 +7,8 @@
 
 ## 2. Lifecycle and deterministic behavior
 
-- [ ] 2.1 Implement typed pause, resume, and restart commands; verify tests prove pause halts ticks, resume continues advancement, and restart restores the initial running snapshot.
-- [ ] 2.2 Return immutable value snapshots and verify two sessions receiving identical ordered commands and elapsed updates produce equal snapshots without browser or Phaser setup.
+- [x] 2.1 Implement typed pause, resume, and restart commands; verify tests prove pause halts ticks, resume continues advancement, and restart restores the initial running snapshot.
+- [x] 2.2 Return immutable value snapshots and verify two sessions receiving identical ordered commands and elapsed updates produce equal snapshots without browser or Phaser setup.
 
 ## 3. Integration verification
 
