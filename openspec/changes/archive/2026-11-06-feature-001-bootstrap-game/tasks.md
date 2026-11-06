@@ -14,9 +14,9 @@
 
 ## 3. Integration verification
 
-- [ ] 3.1 Run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`; verify every command exits successfully.
-- [ ] 3.2 Perform the manual smoke check: open the app in Chromium or Firefox on desktop, resize the viewport, then open it in a landscape touch-enabled mobile viewport; verify a visible placeholder canvas, responsive resizing, and no horizontal overflow. Record the user-provided result before marking this task complete.
-- [ ] 3.3 Update `docs/BACKLOG.md` status only after the automated checks and user-provided manual smoke result pass; verify the status remains `IN PROGRESS` until archive conditions are met.
+- [x] 3.1 Run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build`; verify every command exits successfully.
+- [x] 3.2 Perform the manual smoke check: open the app in Chromium or Firefox on desktop, resize the viewport, then open it in a landscape touch-enabled mobile viewport; verify a visible placeholder canvas, responsive resizing, and no horizontal overflow. Record the user-provided result before marking this task complete.
+- [x] 3.3 Update `docs/BACKLOG.md` status only after the automated checks and user-provided manual smoke result pass; verify the status remains `IN PROGRESS` until archive conditions are met.
 
 ## Workflow follow-up
 
