@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
 import { normalizeViewportSize } from '../../../app/viewport'
-import { createGame } from './createGame'
+import { createGame, resizeGame } from './createGame'
 
 export function GameHost() {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -17,7 +17,7 @@ export function GameHost() {
     const game = createGame(host, initialSize)
     const resizeObserver = new ResizeObserver(([entry]) => {
       const size = normalizeViewportSize(entry.contentRect.width, entry.contentRect.height)
-      game.scale.resize(size.width, size.height)
+      resizeGame(game, size)
     })
 
     resizeObserver.observe(host)
