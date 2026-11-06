@@ -28,5 +28,12 @@ export function GameHost() {
     }
   }, [])
 
-  return <div ref={hostRef} className="game-canvas-host" aria-label="Tower Defence game canvas" />
+  return (
+    <div className="game-canvas-host" aria-label="Tower Defence game canvas">
+      <div ref={hostRef} className="phaser-canvas-host" />
+      <div className="game-title" aria-hidden="true">
+        Tower Defence
+      </div>
+    </div>
+  )
 }

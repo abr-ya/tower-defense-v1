@@ -40,12 +40,29 @@ body {
 }
 
 .game-canvas-host {
+  position: relative;
   width: 100%;
   height: 100%;
 }
 
-.game-canvas-host canvas {
+.phaser-canvas-host {
+  width: 100%;
+  height: 100%;
+}
+
+.phaser-canvas-host canvas {
   display: block;
+}
+
+.game-title {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #c9dcff;
+  font-size: clamp(1.5rem, 5vw, 3rem);
+  font-weight: 700;
+  pointer-events: none;
 }
 
 @media (orientation: landscape) and (max-height: 560px) {
