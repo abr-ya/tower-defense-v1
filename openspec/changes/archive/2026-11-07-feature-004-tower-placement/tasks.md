@@ -19,7 +19,7 @@
 ## 4. Integration verification
 
 - [x] 4.1 Run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build` using the LTS Node environment; verify all commands pass.
-- [ ] 4.2 Perform a user-confirmed manual smoke check in desktop and landscape touch viewport: hover/tap shows a snapped preview, valid cells place a tower, and route/occupied/out-of-bounds cells remain visibly invalid; record the result before marking complete.
+- [x] 4.2 Perform a user-confirmed manual smoke check in desktop and landscape touch viewport: hover/tap shows a snapped preview, valid cells place a tower, and route/occupied/out-of-bounds cells remain visibly invalid; record the result before marking complete.
 
 ## Workflow follow-up
 
