@@ -23,7 +23,7 @@ Status: initial planning | Updated: 2026-11-04
 |---|---|---|---|---|---|
 | feature-001 | M0 | High | DONE | Bootstrap Vite/React/Phaser/TS and OpenSpec (`feature-001-bootstrap-game`) | Local browser shows responsive game canvas; scripts for lint, typecheck, test, build work |
 | feature-002 | M0 | High | DONE | Pure TS simulation loop (`feature-002-simulation-core`) | Fixed-step update, state/commands, pause; unit tests independent of Phaser |
-| feature-003 | M1 | High | TODO | Level and route loading (`feature-003-level-route`) | One authored map; enemy follows waypoints at stable speed |
+| feature-003 | M1 | High | DONE | Level and route loading (`feature-003-level-route`) | One authored map; enemy follows waypoints at stable speed |
 | feature-004 | M1 | High | TODO | Placement preview and validation (`feature-004-tower-placement`) | Valid cells highlighted; invalid cells rejected; mouse/touch input |
 | feature-005 | M1 | High | TODO | Targeting and projectile damage (`feature-005-basic-combat`) | Tower attacks enemies in range; death/reward logic tested |
 | feature-006 | M1 | High | TODO | Waves and base health (`feature-006-waves-and-outcomes`) | Five prototype waves; escapes reduce health; win/lose/restart |
