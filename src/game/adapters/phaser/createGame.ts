@@ -1,12 +1,14 @@
 import Phaser from 'phaser'
 
 import type { ViewportSize } from '../../../app/viewport'
-import { createSimulationSession } from '../../core'
+import { createSimulationSession, prototypeLevel, validatePlacement } from '../../core'
 import type { SimulationSnapshot, WorldPoint } from '../../core'
 
 class BootstrapScene extends Phaser.Scene {
   private readonly session = createSimulationSession()
+  private previewPosition?: WorldPoint
   private routeGraphics?: Phaser.GameObjects.Graphics
+  private placementGraphics?: Phaser.GameObjects.Graphics
   private enemyGraphics?: Phaser.GameObjects.Arc
 
   public constructor() {
@@ -16,9 +18,12 @@ class BootstrapScene extends Phaser.Scene {
   public create(): void {
     this.cameras.main.setBackgroundColor('#17233f')
     this.routeGraphics = this.add.graphics()
+    this.placementGraphics = this.add.graphics()
     this.enemyGraphics = this.add.circle(0, 0, 12, 0xf4b942)
 
     this.scale.on(Phaser.Scale.Events.RESIZE, this.renderSnapshot, this)
+    this.input.on('pointermove', this.updatePreview, this)
+    this.input.on('pointerdown', this.placeTower, this)
     this.renderSnapshot()
   }
 
@@ -28,7 +33,7 @@ class BootstrapScene extends Phaser.Scene {
   }
 
   private renderSnapshot(): void {
-    if (this.routeGraphics === undefined || this.enemyGraphics === undefined) {
+    if (this.routeGraphics === undefined || this.placementGraphics === undefined || this.enemyGraphics === undefined) {
       return
     }
 
@@ -48,6 +53,23 @@ class BootstrapScene extends Phaser.Scene {
     this.routeGraphics.fillStyle(0x9bc4ff, 1)
     for (const waypoint of waypoints) {
       this.routeGraphics.fillCircle(...this.toScreenPoint(waypoint, transform), 6)
+    }
+
+    this.placementGraphics.clear()
+    const footprint = prototypeLevel.placement.towerFootprint * transform.scale
+    for (const tower of snapshot.towers) {
+      const [towerX, towerY] = this.toScreenPoint(tower.position, transform)
+      this.placementGraphics.fillStyle(0x78d9c7, 1)
+      this.placementGraphics.fillRect(towerX - footprint / 2, towerY - footprint / 2, footprint, footprint)
+    }
+
+    if (this.previewPosition !== undefined) {
+      const preview = validatePlacement(prototypeLevel, snapshot.towers, this.previewPosition)
+      const [previewX, previewY] = this.toScreenPoint(preview.position, transform)
+      this.placementGraphics.fillStyle(preview.accepted ? 0x8fe388 : 0xef6a6a, 0.55)
+      this.placementGraphics.fillRect(previewX - footprint / 2, previewY - footprint / 2, footprint, footprint)
+      this.placementGraphics.lineStyle(2, preview.accepted ? 0xd5ffc4 : 0xffc1c1, 1)
+      this.placementGraphics.strokeRect(previewX - footprint / 2, previewY - footprint / 2, footprint, footprint)
     }
 
     const [enemyX, enemyY] = this.toScreenPoint(snapshot.enemy.position, transform)
@@ -80,6 +102,25 @@ class BootstrapScene extends Phaser.Scene {
     transform: Readonly<{ scale: number; offsetX: number; offsetY: number }>,
   ): [number, number] {
     return [point.x * transform.scale + transform.offsetX, point.y * transform.scale + transform.offsetY]
+  }
+
+  private updatePreview(pointer: Phaser.Input.Pointer): void {
+    this.previewPosition = this.toWorldPoint(pointer.x, pointer.y)
+    this.renderSnapshot()
+  }
+
+  private placeTower(pointer: Phaser.Input.Pointer): void {
+    this.previewPosition = this.toWorldPoint(pointer.x, pointer.y)
+    this.session.dispatch({ type: 'placeTower', position: this.previewPosition })
+    this.renderSnapshot()
+  }
+
+  private toWorldPoint(screenX: number, screenY: number): WorldPoint {
+    const transform = this.getWorldTransform(this.session.getSnapshot())
+    return {
+      x: (screenX - transform.offsetX) / transform.scale,
+      y: (screenY - transform.offsetY) / transform.scale,
+    }
   }
 }
 

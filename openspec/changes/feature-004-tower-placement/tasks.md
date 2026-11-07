@@ -12,13 +12,13 @@
 
 ## 3. Phaser interaction and rendering
 
-- [ ] 3.1 Add resize-safe inverse world conversion and unified Phaser pointer handling for mouse and touch; verify a pointer position maps to the same cell used by pure validation.
-- [ ] 3.2 Render a snapped valid/invalid preview and committed placeholder towers from snapshots without duplicating validation rules; verify the development server opens with no application console errors.
-- [ ] 3.3 Mark feature 004 IN PROGRESS in `docs/BACKLOG.md`; verify its status remains IN PROGRESS until all checks, sync, and archive complete.
+- [x] 3.1 Add resize-safe inverse world conversion and unified Phaser pointer handling for mouse and touch; verify a pointer position maps to the same cell used by pure validation.
+- [x] 3.2 Render a snapped valid/invalid preview and committed placeholder towers from snapshots without duplicating validation rules; verify the development server opens with no application console errors.
+- [x] 3.3 Mark feature 004 IN PROGRESS in `docs/BACKLOG.md`; verify its status remains IN PROGRESS until all checks, sync, and archive complete.
 
 ## 4. Integration verification
 
-- [ ] 4.1 Run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build` using the LTS Node environment; verify all commands pass.
+- [x] 4.1 Run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build` using the LTS Node environment; verify all commands pass.
 - [ ] 4.2 Perform a user-confirmed manual smoke check in desktop and landscape touch viewport: hover/tap shows a snapped preview, valid cells place a tower, and route/occupied/out-of-bounds cells remain visibly invalid; record the result before marking complete.
 
 ## Workflow follow-up
