@@ -7,14 +7,14 @@
 
 ## 2. Phaser visualization
 
-- [ ] 2.1 Update the Phaser bootstrap scene to create a session from the prototype level, advance it from Phaser frame deltas, and render the route and enemy solely from simulation snapshots. Verify the development server loads without browser console errors.
-- [ ] 2.2 Fit logical map coordinates into the renderer and update drawing on resize. Verify desktop and landscape browser views keep the route and enemy visible without horizontal overflow.
+- [x] 2.1 Update the Phaser bootstrap scene to create a session from the prototype level, advance it from Phaser frame deltas, and render the route and enemy solely from simulation snapshots. Verify the development server loads without browser console errors.
+- [x] 2.2 Fit logical map coordinates into the renderer and update drawing on resize. Verify desktop and landscape browser views keep the route and enemy visible without horizontal overflow.
 
 ## 3. Integration verification
 
-- [ ] 3.1 Run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build` using the project LTS Node environment; verify all commands pass.
+- [x] 3.1 Run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build` using the project LTS Node environment; verify all commands pass.
 - [ ] 3.2 Perform a manual smoke check in desktop Chromium or Firefox: open the game, observe the visible route and stable moving enemy, then resize the window. Repeat in a landscape touch-device viewport and verify no horizontal overflow. Record the user-provided result before marking these tasks complete.
-- [ ] 3.3 Keep feature 003 marked IN PROGRESS in `docs/BACKLOG.md` until automated checks, the user-confirmed smoke check, specification sync, and archive are complete.
+- [x] 3.3 Keep feature 003 marked IN PROGRESS in `docs/BACKLOG.md` until automated checks, the user-confirmed smoke check, specification sync, and archive are complete.
 
 ## 4. Completion workflow
 
