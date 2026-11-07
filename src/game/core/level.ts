@@ -8,11 +8,18 @@ export type WorldBounds = Readonly<{
   height: number
 }>
 
+export type PlacementConfig = Readonly<{
+  gridSize: number
+  towerFootprint: number
+  routeExclusionRadius: number
+}>
+
 export type LevelDefinition = Readonly<{
   id: string
   bounds: WorldBounds
   route: readonly WorldPoint[]
   enemySpeed: number
+  placement: PlacementConfig
 }>
 
 export function validateLevelDefinition(level: LevelDefinition): void {
@@ -30,6 +37,12 @@ export function validateLevelDefinition(level: LevelDefinition): void {
 
   if (!Number.isFinite(level.enemySpeed) || level.enemySpeed <= 0) {
     throw new RangeError('Enemy speed must be a positive finite number.')
+  }
+
+  for (const value of [level.placement.gridSize, level.placement.towerFootprint, level.placement.routeExclusionRadius]) {
+    if (!Number.isFinite(value) || value <= 0) {
+      throw new RangeError('Placement configuration values must be positive finite numbers.')
+    }
   }
 
   for (const [index, waypoint] of level.route.entries()) {

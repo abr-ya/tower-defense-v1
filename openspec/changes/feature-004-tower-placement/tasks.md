@@ -2,13 +2,13 @@
 
 ## 1. Pure placement model
 
-- [ ] 1.1 Add prototype-level placement configuration for grid size, tower footprint, and route exclusion radius; implement pure world-position snapping to cell centres and verify focused unit tests cover stable snapping.
-- [ ] 1.2 Implement pure placement validation against bounds, route segments, and occupied tower footprints with typed rejection reasons; verify unit tests cover every accepted and rejected candidate.
+- [x] 1.1 Add prototype-level placement configuration for grid size, tower footprint, and route exclusion radius; implement pure world-position snapping to cell centres and verify focused unit tests cover stable snapping.
+- [x] 1.2 Implement pure placement validation against bounds, route segments, and occupied tower footprints with typed rejection reasons; verify unit tests cover every accepted and rejected candidate.
 
 ## 2. Simulation placement state
 
-- [ ] 2.1 Extend typed simulation commands and immutable snapshots with placement attempts, placed towers, and the latest inspectable rejection; verify tests prove valid commands add one snapped tower and invalid commands leave tower state unchanged.
-- [ ] 2.2 Preserve lifecycle and deterministic session behavior with placement state; verify restart clears towers and equivalent sessions receiving identical placement inputs retain identical snapshots.
+- [x] 2.1 Extend typed simulation commands and immutable snapshots with placement attempts, placed towers, and the latest inspectable rejection; verify tests prove valid commands add one snapped tower and invalid commands leave tower state unchanged.
+- [x] 2.2 Preserve lifecycle and deterministic session behavior with placement state; verify restart clears towers and equivalent sessions receiving identical placement inputs retain identical snapshots.
 
 ## 3. Phaser interaction and rendering
 

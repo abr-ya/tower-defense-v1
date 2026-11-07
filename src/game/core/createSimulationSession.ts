@@ -2,6 +2,7 @@ import { FIXED_STEP_SECONDS, MAX_CATCH_UP_TICKS } from './constants'
 import { prototypeLevel } from '../content/prototypeLevel'
 import { validateLevelDefinition } from './level'
 import { createRouteTraversal, getRoutePosition } from './route'
+import { validatePlacement } from './placement'
 
 import type {
   SimulationCommand,
@@ -10,6 +11,7 @@ import type {
   SimulationSnapshot,
 } from './types'
 import type { LevelDefinition } from './level'
+import type { PlacedTower, PlacementRejectionReason } from './placement'
 
 export function createSimulationSession(level: LevelDefinition = prototypeLevel): SimulationSession {
   validateLevelDefinition(level)
@@ -18,6 +20,8 @@ export function createSimulationSession(level: LevelDefinition = prototypeLevel)
   let phase: SimulationPhase = 'running'
   let tick = 0
   let travelledDistance = 0
+  let towers: readonly PlacedTower[] = Object.freeze([])
+  let lastPlacementRejection: PlacementRejectionReason | null = null
   const traversal = createRouteTraversal(level)
   const routeSnapshot = Object.freeze({
     bounds: Object.freeze({ ...level.bounds }),
@@ -65,7 +69,19 @@ export function createSimulationSession(level: LevelDefinition = prototypeLevel)
           phase = 'running'
           tick = 0
           travelledDistance = 0
+          towers = Object.freeze([])
+          lastPlacementRejection = null
           break
+        case 'placeTower': {
+          const result = validatePlacement(level, towers, command.position)
+          if (result.accepted) {
+            towers = Object.freeze([...towers, Object.freeze({ id: towers.length + 1, position: result.position })])
+            lastPlacementRejection = null
+          } else {
+            lastPlacementRejection = result.reason
+          }
+          break
+        }
       }
     },
 
@@ -82,6 +98,8 @@ export function createSimulationSession(level: LevelDefinition = prototypeLevel)
           speed: level.enemySpeed,
           completedRoute: routePosition.completed,
         }),
+        towers,
+        lastPlacementRejection,
       })
     },
   }
