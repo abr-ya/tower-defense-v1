@@ -13,6 +13,7 @@ export type PlacementConfig = Readonly<{
   towerFootprint: number
   routeExclusionRadius: number
 }>
+export type CombatConfig = Readonly<{ towerRange: number; towerCooldownSeconds: number; projectileSpeed: number; projectileDamage: number; enemyHealth: number }>
 
 export type LevelDefinition = Readonly<{
   id: string
@@ -20,6 +21,7 @@ export type LevelDefinition = Readonly<{
   route: readonly WorldPoint[]
   enemySpeed: number
   placement: PlacementConfig
+  combat: CombatConfig
 }>
 
 export function validateLevelDefinition(level: LevelDefinition): void {
@@ -44,6 +46,7 @@ export function validateLevelDefinition(level: LevelDefinition): void {
       throw new RangeError('Placement configuration values must be positive finite numbers.')
     }
   }
+  for (const value of Object.values(level.combat)) if (!Number.isFinite(value) || value <= 0) throw new RangeError('Combat configuration values must be positive finite numbers.')
 
   for (const [index, waypoint] of level.route.entries()) {
     if (!Number.isFinite(waypoint.x) || !Number.isFinite(waypoint.y)) {

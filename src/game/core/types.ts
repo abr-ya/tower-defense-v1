@@ -21,8 +21,11 @@ export type SimulationSnapshot = Readonly<{
     position: WorldPoint
     speed: number
     completedRoute: boolean
-  }>
+    health: number
+    maxHealth: number
+  }> | null
   towers: readonly PlacedTower[]
+  projectiles: readonly Readonly<{ id: number; position: WorldPoint; targetId: number }>[]
   lastPlacementRejection: PlacementRejectionReason | null
 }>
 

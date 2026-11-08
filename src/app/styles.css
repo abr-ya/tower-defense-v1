@@ -64,11 +64,10 @@ body {
 
 .game-title {
   position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
+  top: clamp(0.75rem, 2vw, 1.25rem);
+  left: clamp(0.75rem, 2vw, 1.25rem);
   color: #c9dcff;
-  font-size: clamp(1.5rem, 5vw, 3rem);
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
   font-weight: 700;
   pointer-events: none;
 }
