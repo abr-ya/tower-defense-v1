@@ -5,6 +5,8 @@ import {
   MAX_CATCH_UP_TICKS,
   createSimulationSession,
   prototypeLevel,
+  snapToPlacementGrid,
+  validatePlacement,
   validateLevelDefinition,
 } from './index'
 import type { LevelDefinition } from './index'
@@ -18,6 +20,7 @@ const testLevel: LevelDefinition = {
     { x: 30, y: 40 },
   ],
   enemySpeed: 60,
+  placement: { gridSize: 10, towerFootprint: 8, routeExclusionRadius: 2 },
 }
 
 describe('createSimulationSession', () => {
@@ -169,5 +172,30 @@ describe('createSimulationSession', () => {
       speed: 60,
       completedRoute: false,
     })
+  })
+
+  it('snaps placement candidates to stable grid centres', () => {
+    expect(snapToPlacementGrid(testLevel, { x: 24, y: 26 })).toEqual({ x: 25, y: 25 })
+    expect(snapToPlacementGrid(testLevel, { x: 26, y: 24 })).toEqual({ x: 25, y: 25 })
+  })
+
+  it('validates bounds, route, and occupied placement candidates', () => {
+    expect(validatePlacement(testLevel, [], { x: -100, y: 95 })).toMatchObject({ accepted: false, reason: 'bounds' })
+    expect(validatePlacement(testLevel, [], { x: 15, y: 5 })).toMatchObject({ accepted: false, reason: 'route' })
+    expect(validatePlacement(testLevel, [{ id: 1, position: { x: 75, y: 75 } }], { x: 75, y: 75 })).toMatchObject({ accepted: false, reason: 'occupied' })
+    expect(validatePlacement(testLevel, [], { x: 75, y: 75 })).toMatchObject({ accepted: true, position: { x: 75, y: 75 } })
+  })
+
+  it('commits valid towers, reports rejected placements, and resets placement state', () => {
+    const session = createSimulationSession(testLevel)
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 } })
+    expect(session.getSnapshot().towers).toEqual([{ id: 1, position: { x: 75, y: 75 } }])
+
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 } })
+    expect(session.getSnapshot()).toMatchObject({ lastPlacementRejection: 'occupied' })
+    expect(session.getSnapshot().towers).toHaveLength(1)
+
+    session.dispatch({ type: 'restart' })
+    expect(session.getSnapshot()).toMatchObject({ towers: [], lastPlacementRejection: null })
   })
 })

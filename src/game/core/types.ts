@@ -1,4 +1,5 @@
 import type { WorldBounds, WorldPoint } from './level'
+import type { PlacedTower, PlacementRejectionReason } from './placement'
 
 export type SimulationPhase = 'running' | 'paused'
 
@@ -6,6 +7,7 @@ export type SimulationCommand =
   | Readonly<{ type: 'pause' }>
   | Readonly<{ type: 'resume' }>
   | Readonly<{ type: 'restart' }>
+  | Readonly<{ type: 'placeTower'; position: WorldPoint }>
 
 export type SimulationSnapshot = Readonly<{
   phase: SimulationPhase
@@ -20,6 +22,8 @@ export type SimulationSnapshot = Readonly<{
     speed: number
     completedRoute: boolean
   }>
+  towers: readonly PlacedTower[]
+  lastPlacementRejection: PlacementRejectionReason | null
 }>
 
 export type SimulationSession = Readonly<{

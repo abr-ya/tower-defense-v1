@@ -1,6 +1,8 @@
 export { FIXED_STEP_SECONDS, MAX_CATCH_UP_TICKS } from './constants'
 export { createSimulationSession } from './createSimulationSession'
 export { validateLevelDefinition } from './level'
+export { snapToPlacementGrid, validatePlacement } from './placement'
 export { prototypeLevel } from '../content/prototypeLevel'
 export type { SimulationCommand, SimulationPhase, SimulationSession, SimulationSnapshot } from './types'
 export type { LevelDefinition, WorldBounds, WorldPoint } from './level'
+export type { PlacedTower, PlacementRejectionReason, PlacementResult } from './placement'
