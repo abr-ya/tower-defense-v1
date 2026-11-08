@@ -2,13 +2,13 @@
 
 ## 1. Pure combat model
 
-- [ ] 1.1 Add validated prototype combat statistics for tower range, cooldown, projectile speed, damage, and enemy health; verify unit tests reject invalid values.
-- [ ] 1.2 Implement pure nearest-target acquisition, fixed-step cooldowns, projectile travel, damage, and defeated-enemy removal; verify focused tests cover range, firing order, hit damage, removal, and equivalent sessions.
+- [x] 1.1 Add validated prototype combat statistics for tower range, cooldown, projectile speed, damage, and enemy health; verify unit tests reject invalid values.
+- [x] 1.2 Implement pure nearest-target acquisition, fixed-step cooldowns, projectile travel, damage, and defeated-enemy removal; verify focused tests cover range, firing order, hit damage, removal, and equivalent sessions.
 
 ## 2. Session integration
 
-- [ ] 2.1 Extend immutable simulation snapshots with living enemy health, tower combat state, and projectile snapshots; verify restart restores the initial combat state.
-- [ ] 2.2 Keep route traversal and placement behavior compatible with combat; verify existing tests remain green alongside new combat tests.
+- [x] 2.1 Extend immutable simulation snapshots with living enemy health, tower combat state, and projectile snapshots; verify restart restores the initial combat state.
+- [x] 2.2 Keep route traversal and placement behavior compatible with combat; verify existing tests remain green alongside new combat tests.
 
 ## 3. Browser visualization
 

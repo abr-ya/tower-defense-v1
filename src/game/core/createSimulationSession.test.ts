@@ -21,6 +21,7 @@ const testLevel: LevelDefinition = {
   ],
   enemySpeed: 60,
   placement: { gridSize: 10, towerFootprint: 8, routeExclusionRadius: 2 },
+  combat: { towerRange: 100, towerCooldownSeconds: 0.1, projectileSpeed: 600, projectileDamage: 50, enemyHealth: 100 },
 }
 
 describe('createSimulationSession', () => {
@@ -150,7 +151,14 @@ describe('createSimulationSession', () => {
     for (let index = 0; index < 2; index += 1) {
       session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
     }
-    expect(session.getSnapshot().enemy.position).toEqual({ x: 30, y: 10 })
+    expect(session.getSnapshot().enemy?.position).toEqual({ x: 30, y: 10 })
+  })
+
+  it('fires at an in-range enemy and removes it after lethal projectile damage', () => {
+    const session = createSimulationSession(testLevel)
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 } })
+    for (let index = 0; index < 20; index += 1) session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
+    expect(session.getSnapshot().enemy).toBeNull()
   })
 
   it('clamps the enemy at the final waypoint and restarts its route', () => {
@@ -160,14 +168,14 @@ describe('createSimulationSession', () => {
       session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
     }
 
-    expect(session.getSnapshot().enemy).toEqual({
+    expect(session.getSnapshot().enemy).toMatchObject({
       position: { x: 30, y: 40 },
       speed: 60,
       completedRoute: true,
     })
 
     session.dispatch({ type: 'restart' })
-    expect(session.getSnapshot().enemy).toEqual({
+    expect(session.getSnapshot().enemy).toMatchObject({
       position: { x: 0, y: 0 },
       speed: 60,
       completedRoute: false,

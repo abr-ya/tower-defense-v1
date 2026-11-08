@@ -12,4 +12,5 @@ export const prototypeLevel: LevelDefinition = Object.freeze({
   ]),
   enemySpeed: 70,
   placement: Object.freeze({ gridSize: 48, towerFootprint: 32, routeExclusionRadius: 28 }),
+  combat: Object.freeze({ towerRange: 180, towerCooldownSeconds: 0.5, projectileSpeed: 380, projectileDamage: 20, enemyHealth: 100 }),
 })

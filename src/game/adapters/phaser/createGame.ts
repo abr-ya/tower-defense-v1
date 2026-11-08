@@ -72,9 +72,13 @@ class BootstrapScene extends Phaser.Scene {
       this.placementGraphics.strokeRect(previewX - footprint / 2, previewY - footprint / 2, footprint, footprint)
     }
 
-    const [enemyX, enemyY] = this.toScreenPoint(snapshot.enemy.position, transform)
-    this.enemyGraphics.setPosition(enemyX, enemyY)
-    this.enemyGraphics.setFillStyle(snapshot.enemy.completedRoute ? 0x8fe388 : 0xf4b942)
+    if (snapshot.enemy === null) {
+      this.enemyGraphics.setVisible(false)
+    } else {
+      const [enemyX, enemyY] = this.toScreenPoint(snapshot.enemy.position, transform)
+      this.enemyGraphics.setVisible(true).setPosition(enemyX, enemyY)
+      this.enemyGraphics.setFillStyle(snapshot.enemy.completedRoute ? 0x8fe388 : 0xf4b942)
+    }
   }
 
   private getWorldTransform(snapshot: SimulationSnapshot): Readonly<{
