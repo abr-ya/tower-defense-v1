@@ -12,7 +12,7 @@ The session has one route enemy, placement, and combat but no respawn or outcome
 
 ## Decisions
 
-Use a compact authored array of wave spawn intervals and one runtime spawn queue. A terminal phase prevents movement, firing, and spawning after win/loss. Phaser renders only snapshot status text.
+Use a compact authored array of wave spawn intervals and one runtime spawn queue. A terminal phase prevents movement, firing, and spawning after win/loss. Phaser renders snapshot status text and a `Restart` button only for terminal outcomes; the button dispatches the existing `restart` command and hides again once the new session is running.
 
 ## Risks / Trade-offs
 
@@ -23,4 +23,4 @@ Use a compact authored array of wave spawn intervals and one runtime spawn queue
 
 1. Add wave data and pure state tests.
 2. Integrate spawning, escapes, outcomes, and restart.
-3. Render status and run browser smoke checks.
+3. Render status and a terminal restart button, then run browser smoke checks.

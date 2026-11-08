@@ -10,7 +10,7 @@ Combat currently has no sequence, consequence for escaped enemies, or terminal o
 - Add base health; escaped enemies reduce it and are removed.
 - Add deterministic wave progression plus won and lost terminal states.
 - Extend restart to restore waves, enemies, base health, and outcome.
-- Render wave/base/outcome state in the browser with placeholder presentation.
+- Render wave/base/outcome state and a terminal-only restart button in the browser with placeholder presentation.
 - Exclude currency, rewards, wave controls, tower variety, upgrades, and additional enemy types.
 
 ## Capabilities
