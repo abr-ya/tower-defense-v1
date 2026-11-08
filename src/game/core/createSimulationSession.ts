@@ -5,6 +5,7 @@ import { createRouteTraversal, getRoutePosition } from './route'
 import { validatePlacement } from './placement'
 
 import type {
+  GameOutcome,
   SimulationCommand,
   SimulationPhase,
   SimulationSession,
@@ -26,6 +27,9 @@ export function createSimulationSession(level: LevelDefinition = prototypeLevel)
   let projectileId = 0
   let projectiles: readonly Readonly<{ id: number; position: { x: number; y: number }; targetId: number }>[] = Object.freeze([])
   let cooldowns: readonly number[] = Object.freeze([])
+  let wave = 1
+  let baseHealth = level.outcomes.baseHealth
+  let outcome: GameOutcome = 'playing'
   const traversal = createRouteTraversal(level)
   const routeSnapshot = Object.freeze({
     bounds: Object.freeze({ ...level.bounds }),
@@ -96,6 +100,9 @@ export function createSimulationSession(level: LevelDefinition = prototypeLevel)
           projectileId = 0
           projectiles = Object.freeze([])
           cooldowns = Object.freeze([])
+          wave = 1
+          baseHealth = level.outcomes.baseHealth
+          outcome = 'playing'
           break
         case 'placeTower': {
           const result = validatePlacement(level, towers, command.position)
@@ -129,6 +136,9 @@ export function createSimulationSession(level: LevelDefinition = prototypeLevel)
         towers,
         projectiles,
         lastPlacementRejection,
+        wave,
+        baseHealth,
+        outcome,
       })
     },
   }

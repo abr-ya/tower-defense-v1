@@ -8,6 +8,7 @@ import {
   snapToPlacementGrid,
   validatePlacement,
   validateLevelDefinition,
+  createWaveSchedule,
 } from './index'
 import type { LevelDefinition } from './index'
 
@@ -22,6 +23,7 @@ const testLevel: LevelDefinition = {
   enemySpeed: 60,
   placement: { gridSize: 10, towerFootprint: 8, routeExclusionRadius: 2 },
   combat: { towerRange: 100, towerCooldownSeconds: 0.1, projectileSpeed: 600, projectileDamage: 50, enemyHealth: 100 },
+  outcomes: { baseHealth: 3, escapeDamage: 1, waves: [{ enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }] },
 }
 
 describe('createSimulationSession', () => {
@@ -205,5 +207,15 @@ describe('createSimulationSession', () => {
 
     session.dispatch({ type: 'restart' })
     expect(session.getSnapshot()).toMatchObject({ towers: [], lastPlacementRejection: null })
+  })
+
+  it('creates an ordered five-wave schedule from authored content', () => {
+    expect(createWaveSchedule(testLevel.outcomes.waves)).toEqual([
+      { wave: 1, enemyCount: 1, spawnIntervalSeconds: 0 },
+      { wave: 2, enemyCount: 1, spawnIntervalSeconds: 0 },
+      { wave: 3, enemyCount: 1, spawnIntervalSeconds: 0 },
+      { wave: 4, enemyCount: 1, spawnIntervalSeconds: 0 },
+      { wave: 5, enemyCount: 1, spawnIntervalSeconds: 0 },
+    ])
   })
 })
