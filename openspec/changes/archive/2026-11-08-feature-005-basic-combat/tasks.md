@@ -18,7 +18,7 @@
 ## 4. Integration verification
 
 - [x] 4.1 Run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build` with LTS Node; verify all commands pass.
-- [ ] 4.2 Perform a user-confirmed desktop and landscape touch smoke check: place an in-range tower, observe target/projectile/health loss/enemy defeat, and verify out-of-range towers do not fire.
+- [x] 4.2 Perform a user-confirmed desktop and landscape touch smoke check: place an in-range tower, observe target/projectile/health loss/enemy defeat, and verify out-of-range towers do not fire.
 
 ## Workflow follow-up
 
