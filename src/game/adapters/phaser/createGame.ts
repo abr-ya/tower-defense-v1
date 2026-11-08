@@ -8,6 +8,7 @@ class BootstrapScene extends Phaser.Scene {
   private readonly session = createSimulationSession()
   private previewPosition?: WorldPoint
   private routeGraphics?: Phaser.GameObjects.Graphics
+  private combatGraphics?: Phaser.GameObjects.Graphics
   private placementGraphics?: Phaser.GameObjects.Graphics
   private enemyGraphics?: Phaser.GameObjects.Arc
 
@@ -18,6 +19,7 @@ class BootstrapScene extends Phaser.Scene {
   public create(): void {
     this.cameras.main.setBackgroundColor('#17233f')
     this.routeGraphics = this.add.graphics()
+    this.combatGraphics = this.add.graphics()
     this.placementGraphics = this.add.graphics()
     this.enemyGraphics = this.add.circle(0, 0, 12, 0xf4b942)
 
@@ -33,7 +35,7 @@ class BootstrapScene extends Phaser.Scene {
   }
 
   private renderSnapshot(): void {
-    if (this.routeGraphics === undefined || this.placementGraphics === undefined || this.enemyGraphics === undefined) {
+    if (this.routeGraphics === undefined || this.combatGraphics === undefined || this.placementGraphics === undefined || this.enemyGraphics === undefined) {
       return
     }
 
@@ -56,11 +58,19 @@ class BootstrapScene extends Phaser.Scene {
     }
 
     this.placementGraphics.clear()
+    this.combatGraphics.clear()
     const footprint = prototypeLevel.placement.towerFootprint * transform.scale
     for (const tower of snapshot.towers) {
       const [towerX, towerY] = this.toScreenPoint(tower.position, transform)
+      this.combatGraphics.lineStyle(1, 0x78d9c7, 0.35)
+      this.combatGraphics.strokeCircle(towerX, towerY, prototypeLevel.combat.towerRange * transform.scale)
       this.placementGraphics.fillStyle(0x78d9c7, 1)
       this.placementGraphics.fillRect(towerX - footprint / 2, towerY - footprint / 2, footprint, footprint)
+    }
+
+    this.combatGraphics.fillStyle(0xffe082, 1)
+    for (const projectile of snapshot.projectiles) {
+      this.combatGraphics.fillCircle(...this.toScreenPoint(projectile.position, transform), 4)
     }
 
     if (this.previewPosition !== undefined) {
@@ -78,6 +88,12 @@ class BootstrapScene extends Phaser.Scene {
       const [enemyX, enemyY] = this.toScreenPoint(snapshot.enemy.position, transform)
       this.enemyGraphics.setVisible(true).setPosition(enemyX, enemyY)
       this.enemyGraphics.setFillStyle(snapshot.enemy.completedRoute ? 0x8fe388 : 0xf4b942)
+      const healthWidth = 28
+      const healthRatio = snapshot.enemy.health / snapshot.enemy.maxHealth
+      this.combatGraphics.fillStyle(0x311c2b, 1)
+      this.combatGraphics.fillRect(enemyX - healthWidth / 2, enemyY - 22, healthWidth, 4)
+      this.combatGraphics.fillStyle(0x7ee787, 1)
+      this.combatGraphics.fillRect(enemyX - healthWidth / 2, enemyY - 22, healthWidth * healthRatio, 4)
     }
   }
 

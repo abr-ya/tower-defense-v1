@@ -12,12 +12,12 @@
 
 ## 3. Browser visualization
 
-- [ ] 3.1 Render range indicators, projectiles, and enemy health from snapshots without duplicating combat rules; verify the development server opens without application console errors.
-- [ ] 3.2 Mark feature 005 IN PROGRESS in `docs/BACKLOG.md`; verify its status remains IN PROGRESS until all checks, sync, and archive complete.
+- [x] 3.1 Render range indicators, projectiles, and enemy health from snapshots without duplicating combat rules; verify the development server opens without application console errors.
+- [x] 3.2 Mark feature 005 IN PROGRESS in `docs/BACKLOG.md`; verify its status remains IN PROGRESS until all checks, sync, and archive complete.
 
 ## 4. Integration verification
 
-- [ ] 4.1 Run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build` with LTS Node; verify all commands pass.
+- [x] 4.1 Run `npm run lint`, `npm run typecheck`, `npm run test`, and `npm run build` with LTS Node; verify all commands pass.
 - [ ] 4.2 Perform a user-confirmed desktop and landscape touch smoke check: place an in-range tower, observe target/projectile/health loss/enemy defeat, and verify out-of-range towers do not fire.
 
 ## Workflow follow-up
