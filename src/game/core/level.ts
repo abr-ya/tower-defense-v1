@@ -14,6 +14,8 @@ export type PlacementConfig = Readonly<{
   routeExclusionRadius: number
 }>
 export type CombatConfig = Readonly<{ towerRange: number; towerCooldownSeconds: number; projectileSpeed: number; projectileDamage: number; enemyHealth: number }>
+export type WaveDefinition = Readonly<{ enemyCount: number; spawnIntervalSeconds: number }>
+export type OutcomeConfig = Readonly<{ baseHealth: number; escapeDamage: number; waves: readonly WaveDefinition[] }>
 
 export type LevelDefinition = Readonly<{
   id: string
@@ -22,6 +24,7 @@ export type LevelDefinition = Readonly<{
   enemySpeed: number
   placement: PlacementConfig
   combat: CombatConfig
+  outcomes: OutcomeConfig
 }>
 
 export function validateLevelDefinition(level: LevelDefinition): void {
@@ -47,6 +50,8 @@ export function validateLevelDefinition(level: LevelDefinition): void {
     }
   }
   for (const value of Object.values(level.combat)) if (!Number.isFinite(value) || value <= 0) throw new RangeError('Combat configuration values must be positive finite numbers.')
+  if (level.outcomes.waves.length !== 5 || !Number.isFinite(level.outcomes.baseHealth) || level.outcomes.baseHealth <= 0 || !Number.isFinite(level.outcomes.escapeDamage) || level.outcomes.escapeDamage <= 0) throw new RangeError('Outcome configuration must define five waves and positive base health.')
+  for (const wave of level.outcomes.waves) if (!Number.isInteger(wave.enemyCount) || wave.enemyCount <= 0 || !Number.isFinite(wave.spawnIntervalSeconds) || wave.spawnIntervalSeconds < 0) throw new RangeError('Wave definitions must be valid.')
 
   for (const [index, waypoint] of level.route.entries()) {
     if (!Number.isFinite(waypoint.x) || !Number.isFinite(waypoint.y)) {

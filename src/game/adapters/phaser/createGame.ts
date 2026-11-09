@@ -10,7 +10,10 @@ class BootstrapScene extends Phaser.Scene {
   private routeGraphics?: Phaser.GameObjects.Graphics
   private combatGraphics?: Phaser.GameObjects.Graphics
   private placementGraphics?: Phaser.GameObjects.Graphics
-  private enemyGraphics?: Phaser.GameObjects.Arc
+  private enemyGraphics: Phaser.GameObjects.Arc[] = []
+  private statusText?: Phaser.GameObjects.Text
+  private restartButton?: Phaser.GameObjects.Text
+  private ignoreNextPlacement = false
 
   public constructor() {
     super('bootstrap')
@@ -21,7 +24,14 @@ class BootstrapScene extends Phaser.Scene {
     this.routeGraphics = this.add.graphics()
     this.combatGraphics = this.add.graphics()
     this.placementGraphics = this.add.graphics()
-    this.enemyGraphics = this.add.circle(0, 0, 12, 0xf4b942)
+    this.statusText = this.add.text(24, 80, '', { color: '#ffffff', fontSize: '16px' }).setDepth(1)
+    this.restartButton = this.add.text(24, 152, 'Restart', {
+      backgroundColor: '#4f6cae',
+      color: '#ffffff',
+      fontSize: '18px',
+      padding: { x: 14, y: 8 },
+    }).setDepth(1).setInteractive({ useHandCursor: true }).setVisible(false)
+    this.restartButton.on(Phaser.Input.Events.POINTER_DOWN, this.restartGame, this)
 
     this.scale.on(Phaser.Scale.Events.RESIZE, this.renderSnapshot, this)
     this.input.on('pointermove', this.updatePreview, this)
@@ -35,7 +45,7 @@ class BootstrapScene extends Phaser.Scene {
   }
 
   private renderSnapshot(): void {
-    if (this.routeGraphics === undefined || this.combatGraphics === undefined || this.placementGraphics === undefined || this.enemyGraphics === undefined) {
+    if (this.routeGraphics === undefined || this.combatGraphics === undefined || this.placementGraphics === undefined || this.statusText === undefined || this.restartButton === undefined) {
       return
     }
 
@@ -82,19 +92,28 @@ class BootstrapScene extends Phaser.Scene {
       this.placementGraphics.strokeRect(previewX - footprint / 2, previewY - footprint / 2, footprint, footprint)
     }
 
-    if (snapshot.enemy === null) {
-      this.enemyGraphics.setVisible(false)
-    } else {
-      const [enemyX, enemyY] = this.toScreenPoint(snapshot.enemy.position, transform)
-      this.enemyGraphics.setVisible(true).setPosition(enemyX, enemyY)
-      this.enemyGraphics.setFillStyle(snapshot.enemy.completedRoute ? 0x8fe388 : 0xf4b942)
+    while (this.enemyGraphics.length < snapshot.enemies.length) this.enemyGraphics.push(this.add.circle(0, 0, 12, 0xf4b942))
+    for (const [index, enemy] of snapshot.enemies.entries()) {
+      const enemyGraphics = this.enemyGraphics[index]
+      const [enemyX, enemyY] = this.toScreenPoint(enemy.position, transform)
+      enemyGraphics.setVisible(true).setPosition(enemyX, enemyY).setFillStyle(0xf4b942)
       const healthWidth = 28
-      const healthRatio = snapshot.enemy.health / snapshot.enemy.maxHealth
+      const healthRatio = enemy.health / enemy.maxHealth
       this.combatGraphics.fillStyle(0x311c2b, 1)
       this.combatGraphics.fillRect(enemyX - healthWidth / 2, enemyY - 22, healthWidth, 4)
       this.combatGraphics.fillStyle(0x7ee787, 1)
       this.combatGraphics.fillRect(enemyX - healthWidth / 2, enemyY - 22, healthWidth * healthRatio, 4)
     }
+    for (const enemyGraphics of this.enemyGraphics.slice(snapshot.enemies.length)) enemyGraphics.setVisible(false)
+
+    const outcomeText = snapshot.outcome === 'playing' ? '' : snapshot.outcome === 'won' ? 'VICTORY' : 'DEFEAT'
+    this.combatGraphics.fillStyle(0xffffff, 1)
+    this.combatGraphics.fillRect(16, 74, 190, 68)
+    this.combatGraphics.fillStyle(0x17233f, 1)
+    this.combatGraphics.fillRect(18, 76, 186, 64)
+    this.statusText.setText(`Wave ${snapshot.wave}/5\nBase ${snapshot.baseHealth}${outcomeText ? `\n${outcomeText}` : ''}`)
+    this.statusText.setColor(outcomeText === 'DEFEAT' ? '#ef6a6a' : outcomeText === 'VICTORY' ? '#8fe388' : '#ffffff')
+    this.restartButton.setVisible(snapshot.outcome !== 'playing')
   }
 
   private getWorldTransform(snapshot: SimulationSnapshot): Readonly<{
@@ -130,8 +149,19 @@ class BootstrapScene extends Phaser.Scene {
   }
 
   private placeTower(pointer: Phaser.Input.Pointer): void {
+    if (this.ignoreNextPlacement) {
+      this.ignoreNextPlacement = false
+      return
+    }
     this.previewPosition = this.toWorldPoint(pointer.x, pointer.y)
     this.session.dispatch({ type: 'placeTower', position: this.previewPosition })
+    this.renderSnapshot()
+  }
+
+  private restartGame(): void {
+    this.ignoreNextPlacement = true
+    this.previewPosition = undefined
+    this.session.dispatch({ type: 'restart' })
     this.renderSnapshot()
   }
 

@@ -1,7 +1,16 @@
 import type { WorldBounds, WorldPoint } from './level'
 import type { PlacedTower, PlacementRejectionReason } from './placement'
 
-export type SimulationPhase = 'running' | 'paused'
+export type SimulationPhase = 'running' | 'paused' | 'won' | 'lost'
+export type GameOutcome = 'playing' | 'won' | 'lost'
+
+export type EnemySnapshot = Readonly<{
+  id: number
+  position: WorldPoint
+  speed: number
+  health: number
+  maxHealth: number
+}>
 
 export type SimulationCommand =
   | Readonly<{ type: 'pause' }>
@@ -17,16 +26,13 @@ export type SimulationSnapshot = Readonly<{
     bounds: WorldBounds
     waypoints: readonly WorldPoint[]
   }>
-  enemy: Readonly<{
-    position: WorldPoint
-    speed: number
-    completedRoute: boolean
-    health: number
-    maxHealth: number
-  }> | null
+  enemies: readonly EnemySnapshot[]
   towers: readonly PlacedTower[]
   projectiles: readonly Readonly<{ id: number; position: WorldPoint; targetId: number }>[]
   lastPlacementRejection: PlacementRejectionReason | null
+  wave: number
+  baseHealth: number
+  outcome: GameOutcome
 }>
 
 export type SimulationSession = Readonly<{

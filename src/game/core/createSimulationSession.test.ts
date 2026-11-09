@@ -8,6 +8,7 @@ import {
   snapToPlacementGrid,
   validatePlacement,
   validateLevelDefinition,
+  createWaveSchedule,
 } from './index'
 import type { LevelDefinition } from './index'
 
@@ -22,6 +23,7 @@ const testLevel: LevelDefinition = {
   enemySpeed: 60,
   placement: { gridSize: 10, towerFootprint: 8, routeExclusionRadius: 2 },
   combat: { towerRange: 100, towerCooldownSeconds: 0.1, projectileSpeed: 600, projectileDamage: 50, enemyHealth: 100 },
+  outcomes: { baseHealth: 3, escapeDamage: 1, waves: [{ enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }] },
 }
 
 describe('createSimulationSession', () => {
@@ -142,44 +144,30 @@ describe('createSimulationSession', () => {
     for (let index = 0; index < 6; index += 1) {
       session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
     }
-    expect(session.getSnapshot().enemy).toMatchObject({
+    expect(session.getSnapshot().enemies[0]).toMatchObject({
       position: { x: 30, y: 0 },
       speed: 60,
-      completedRoute: false,
     })
 
     for (let index = 0; index < 2; index += 1) {
       session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
     }
-    expect(session.getSnapshot().enemy?.position).toEqual({ x: 30, y: 10 })
+    expect(session.getSnapshot().enemies[0]?.position).toEqual({ x: 30, y: 10 })
   })
 
   it('fires at an in-range enemy and removes it after lethal projectile damage', () => {
     const session = createSimulationSession(testLevel)
     session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 } })
     for (let index = 0; index < 20; index += 1) session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
-    expect(session.getSnapshot().enemy).toBeNull()
+    expect(session.getSnapshot().enemies.some((enemy) => enemy.id === 1)).toBe(false)
   })
 
-  it('clamps the enemy at the final waypoint and restarts its route', () => {
+  it('removes escaped enemies and reduces base health', () => {
     const session = createSimulationSession(testLevel)
+    for (let index = 0; index < 20; index += 1) session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
 
-    for (let index = 0; index < 20; index += 1) {
-      session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
-    }
-
-    expect(session.getSnapshot().enemy).toMatchObject({
-      position: { x: 30, y: 40 },
-      speed: 60,
-      completedRoute: true,
-    })
-
-    session.dispatch({ type: 'restart' })
-    expect(session.getSnapshot().enemy).toMatchObject({
-      position: { x: 0, y: 0 },
-      speed: 60,
-      completedRoute: false,
-    })
+    expect(session.getSnapshot()).toMatchObject({ baseHealth: 2 })
+    expect(session.getSnapshot().enemies.some((enemy) => enemy.id === 1)).toBe(false)
   })
 
   it('snaps placement candidates to stable grid centres', () => {
@@ -205,5 +193,50 @@ describe('createSimulationSession', () => {
 
     session.dispatch({ type: 'restart' })
     expect(session.getSnapshot()).toMatchObject({ towers: [], lastPlacementRejection: null })
+  })
+
+  it('creates an ordered five-wave schedule from authored content', () => {
+    expect(createWaveSchedule(testLevel.outcomes.waves)).toEqual([
+      { wave: 1, enemyCount: 1, spawnIntervalSeconds: 0 },
+      { wave: 2, enemyCount: 1, spawnIntervalSeconds: 0 },
+      { wave: 3, enemyCount: 1, spawnIntervalSeconds: 0 },
+      { wave: 4, enemyCount: 1, spawnIntervalSeconds: 0 },
+      { wave: 5, enemyCount: 1, spawnIntervalSeconds: 0 },
+    ])
+  })
+
+  it('spawns each wave in authored order and timing', () => {
+    const session = createSimulationSession({
+      ...testLevel,
+      enemySpeed: 1,
+      outcomes: { ...testLevel.outcomes, waves: [{ enemyCount: 2, spawnIntervalSeconds: 0.1 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }] },
+    })
+
+    session.update(FIXED_STEP_SECONDS)
+    expect(session.getSnapshot().enemies.map((enemy) => enemy.id)).toEqual([1])
+    for (let index = 0; index < 10; index += 1) session.update(FIXED_STEP_SECONDS)
+    expect(session.getSnapshot().enemies.map((enemy) => enemy.id)).toEqual([1, 2])
+  })
+
+  it('reports victory after all five waves are defeated', () => {
+    const session = createSimulationSession({
+      ...testLevel,
+      combat: { ...testLevel.combat, enemyHealth: 1 },
+      outcomes: { ...testLevel.outcomes, waves: [{ enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }] },
+    })
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 } })
+    for (let index = 0; index < 30; index += 1) session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
+
+    expect(session.getSnapshot()).toMatchObject({ phase: 'won', outcome: 'won', wave: 5, enemies: [] })
+  })
+
+  it('reports loss and restart restores an equivalent fresh session', () => {
+    const losingLevel = { ...testLevel, outcomes: { ...testLevel.outcomes, baseHealth: 1 } }
+    const session = createSimulationSession(losingLevel)
+    for (let index = 0; index < 20; index += 1) session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
+
+    expect(session.getSnapshot()).toMatchObject({ phase: 'lost', outcome: 'lost', baseHealth: 0 })
+    session.dispatch({ type: 'restart' })
+    expect(session.getSnapshot()).toEqual(createSimulationSession(losingLevel).getSnapshot())
   })
 })
