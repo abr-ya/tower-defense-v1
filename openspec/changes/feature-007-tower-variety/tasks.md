@@ -12,8 +12,8 @@
 
 ## 3. Browser interaction
 
-- [ ] 3.1 Add compact Phaser controls to select each tower type and render type/tier distinctions; verify the development server loads without application console errors.
-- [ ] 3.2 Add placed-tower selection and an eligible-only free Upgrade control without currency display or deduction; verify interaction does not place an unintended tower and hides the action after upgrade.
+- [x] 3.1 Add compact Phaser controls to select each tower type and render type/tier distinctions; verify the development server loads without application console errors.
+- [x] 3.2 Add placed-tower selection and an eligible-only free Upgrade control without currency display or deduction; verify interaction does not place an unintended tower and hides the action after upgrade.
 - [x] 3.3 Mark feature 007 IN PROGRESS in `docs/BACKLOG.md`; verify it remains so until archive.
 
 ## 4. Integration verification
