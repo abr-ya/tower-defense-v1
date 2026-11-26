@@ -3,12 +3,12 @@
 ## 1. Tower content and simulation state
 
 - [x] 1.1 Add validated data-defined Basic, Rapid, and Slow tower definitions with base and one upgrade tier; verify unit tests reject invalid definitions and expose distinct statistics.
-- [ ] 1.2 Extend pure commands, tower/projectile/enemy snapshots, placement, and restart for typed towers and one-tier upgrades; verify unit tests cover valid typed placement, upgrade idempotence, and deterministic equivalent sessions.
+- [x] 1.2 Extend pure commands, tower/projectile/enemy snapshots, placement, and restart for typed towers and one-tier upgrades; verify unit tests cover valid typed placement, upgrade idempotence, and deterministic equivalent sessions.
 
 ## 2. Combat variety
 
-- [ ] 2.1 Resolve target range, cooldown, projectile speed, damage, and effects from each tower's type and tier; verify focused unit tests distinguish Basic, Rapid, and Slow firing behavior.
-- [ ] 2.2 Add the deterministic non-stacking Slow duration and movement multiplier; verify focused unit tests cover effect application, refresh, expiry, and restored normal speed.
+- [x] 2.1 Resolve target range, cooldown, projectile speed, damage, and effects from each tower's type and tier; verify focused unit tests distinguish Basic, Rapid, and Slow firing behavior.
+- [x] 2.2 Add the deterministic non-stacking Slow duration and movement multiplier; verify focused unit tests cover effect application, refresh, expiry, and restored normal speed.
 
 ## 3. Browser interaction
 

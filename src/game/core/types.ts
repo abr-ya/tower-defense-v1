@@ -1,6 +1,6 @@
 import type { WorldBounds, WorldPoint } from './level'
 import type { PlacedTower, PlacementRejectionReason } from './placement'
-import type { TowerTypeId } from './towers'
+import type { TowerEffect, TowerTypeId } from './towers'
 
 export type SimulationPhase = 'running' | 'paused' | 'won' | 'lost'
 export type GameOutcome = 'playing' | 'won' | 'lost'
@@ -11,6 +11,16 @@ export type EnemySnapshot = Readonly<{
   speed: number
   health: number
   maxHealth: number
+  slowRemainingSeconds: number
+}>
+
+export type ProjectileSnapshot = Readonly<{
+  id: number
+  position: WorldPoint
+  targetId: number
+  damage: number
+  speed: number
+  effect: TowerEffect
 }>
 
 export type SimulationCommand =
@@ -30,7 +40,7 @@ export type SimulationSnapshot = Readonly<{
   }>
   enemies: readonly EnemySnapshot[]
   towers: readonly PlacedTower[]
-  projectiles: readonly Readonly<{ id: number; position: WorldPoint; targetId: number }>[]
+  projectiles: readonly ProjectileSnapshot[]
   lastPlacementRejection: PlacementRejectionReason | null
   wave: number
   baseHealth: number

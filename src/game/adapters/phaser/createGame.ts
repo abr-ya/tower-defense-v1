@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 
 import type { ViewportSize } from '../../../app/viewport'
-import { createSimulationSession, prototypeLevel, validatePlacement } from '../../core'
+import { createSimulationSession, getPrototypeTowerStats, prototypeLevel, validatePlacement } from '../../core'
 import type { SimulationSnapshot, TowerTypeId, WorldPoint } from '../../core'
 
 class BootstrapScene extends Phaser.Scene {
@@ -73,8 +73,9 @@ class BootstrapScene extends Phaser.Scene {
     const footprint = prototypeLevel.placement.towerFootprint * transform.scale
     for (const tower of snapshot.towers) {
       const [towerX, towerY] = this.toScreenPoint(tower.position, transform)
+      const towerRange = getPrototypeTowerStats(tower.towerType, tower.tier).range
       this.combatGraphics.lineStyle(1, 0x78d9c7, 0.35)
-      this.combatGraphics.strokeCircle(towerX, towerY, prototypeLevel.combat.towerRange * transform.scale)
+      this.combatGraphics.strokeCircle(towerX, towerY, towerRange * transform.scale)
       this.placementGraphics.fillStyle(0x78d9c7, 1)
       this.placementGraphics.fillRect(towerX - footprint / 2, towerY - footprint / 2, footprint, footprint)
     }

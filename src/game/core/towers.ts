@@ -65,6 +65,13 @@ export function resolveTowerStats(definition: TowerDefinition, tier: TowerTier):
   return tierDefinition.stats
 }
 
+export function findTowerDefinition(
+  definitions: readonly TowerDefinition[],
+  towerType: TowerTypeId,
+): TowerDefinition | undefined {
+  return definitions.find((definition) => definition.id === towerType)
+}
+
 function validateTowerStats(stats: TowerAttackStats): void {
   const numericStats: ReadonlyArray<readonly [string, number]> = [
     ['range', stats.range],

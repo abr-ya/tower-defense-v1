@@ -1,5 +1,5 @@
-import { validateTowerDefinition } from '../core/towers'
-import type { TowerDefinition, TowerTypeId } from '../core/towers'
+import { resolveTowerStats, validateTowerDefinition } from '../core/towers'
+import type { TowerAttackStats, TowerDefinition, TowerTier, TowerTypeId } from '../core/towers'
 
 export const prototypeTowers: readonly TowerDefinition[] = Object.freeze([
   {
@@ -60,6 +60,16 @@ export const prototypeTowers: readonly TowerDefinition[] = Object.freeze([
 
 export function getTowerDefinition(towerType: TowerTypeId): TowerDefinition | undefined {
   return prototypeTowers.find((definition) => definition.id === towerType)
+}
+
+export function getPrototypeTowerStats(towerType: TowerTypeId, tier: TowerTier): TowerAttackStats {
+  const definition = getTowerDefinition(towerType)
+
+  if (definition === undefined) {
+    throw new RangeError(`Tower type "${towerType}" is not a defined tower type.`)
+  }
+
+  return resolveTowerStats(definition, tier)
 }
 
 export function isDefinedTowerType(value: string): value is TowerTypeId {

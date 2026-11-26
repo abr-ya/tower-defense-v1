@@ -13,7 +13,7 @@ export type PlacementConfig = Readonly<{
   towerFootprint: number
   routeExclusionRadius: number
 }>
-export type CombatConfig = Readonly<{ towerRange: number; towerCooldownSeconds: number; projectileSpeed: number; projectileDamage: number; enemyHealth: number }>
+export type CombatConfig = Readonly<{ enemyHealth: number }>
 export type WaveDefinition = Readonly<{ enemyCount: number; spawnIntervalSeconds: number }>
 export type OutcomeConfig = Readonly<{ baseHealth: number; escapeDamage: number; waves: readonly WaveDefinition[] }>
 
