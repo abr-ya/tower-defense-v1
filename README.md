@@ -32,7 +32,7 @@ Gameplay simulation remains independent from rendering, browser APIs, and persis
 - Content validation, balancing tools, and a level editor
 - Desktop packaging for Windows and Linux after browser gameplay is stable
 
-See [`docs/PROJECT.md`](docs/PROJECT.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), and [`docs/BACKLOG.md`](docs/BACKLOG.md) for the current product, technical, and delivery details.
+See [`docs/PROJECT.md`](docs/PROJECT.md), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), and [`docs/BACKLOG.md`](docs/BACKLOG.md) for the current product, technical, and delivery details. Deferred and advanced manual checks are tracked in [`docs/VERIFICATION-BACKLOG.md`](docs/VERIFICATION-BACKLOG.md).
 
 ## Development
 

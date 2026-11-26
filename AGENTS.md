@@ -1,6 +1,6 @@
 # Agent Working Agreement
 
-Read `docs/PROJECT.md`, `docs/ARCHITECTURE.md`, and `docs/BACKLOG.md` before proposing or implementing changes.
+Read `docs/PROJECT.md`, `docs/ARCHITECTURE.md`, and `docs/BACKLOG.md` before proposing or implementing changes. Check `docs/VERIFICATION-BACKLOG.md` for deferred manual checks that still have to be confirmed.
 
 ## Language and naming
 
