@@ -2,7 +2,7 @@
 
 ## 1. Tower content and simulation state
 
-- [ ] 1.1 Add validated data-defined Basic, Rapid, and Slow tower definitions with base and one upgrade tier; verify unit tests reject invalid definitions and expose distinct statistics.
+- [x] 1.1 Add validated data-defined Basic, Rapid, and Slow tower definitions with base and one upgrade tier; verify unit tests reject invalid definitions and expose distinct statistics.
 - [ ] 1.2 Extend pure commands, tower/projectile/enemy snapshots, placement, and restart for typed towers and one-tier upgrades; verify unit tests cover valid typed placement, upgrade idempotence, and deterministic equivalent sessions.
 
 ## 2. Combat variety
@@ -14,7 +14,7 @@
 
 - [ ] 3.1 Add compact Phaser controls to select each tower type and render type/tier distinctions; verify the development server loads without application console errors.
 - [ ] 3.2 Add placed-tower selection and an eligible-only free Upgrade control without currency display or deduction; verify interaction does not place an unintended tower and hides the action after upgrade.
-- [ ] 3.3 Mark feature 007 IN PROGRESS in `docs/BACKLOG.md`; verify it remains so until archive.
+- [x] 3.3 Mark feature 007 IN PROGRESS in `docs/BACKLOG.md`; verify it remains so until archive.
 
 ## 4. Integration verification
 

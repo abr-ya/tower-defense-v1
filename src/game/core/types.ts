@@ -1,5 +1,6 @@
 import type { WorldBounds, WorldPoint } from './level'
 import type { PlacedTower, PlacementRejectionReason } from './placement'
+import type { TowerTypeId } from './towers'
 
 export type SimulationPhase = 'running' | 'paused' | 'won' | 'lost'
 export type GameOutcome = 'playing' | 'won' | 'lost'
@@ -16,7 +17,8 @@ export type SimulationCommand =
   | Readonly<{ type: 'pause' }>
   | Readonly<{ type: 'resume' }>
   | Readonly<{ type: 'restart' }>
-  | Readonly<{ type: 'placeTower'; position: WorldPoint }>
+  | Readonly<{ type: 'placeTower'; position: WorldPoint; towerType: TowerTypeId }>
+  | Readonly<{ type: 'upgradeTower'; towerId: number }>
 
 export type SimulationSnapshot = Readonly<{
   phase: SimulationPhase

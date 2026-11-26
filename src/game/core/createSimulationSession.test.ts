@@ -157,7 +157,7 @@ describe('createSimulationSession', () => {
 
   it('fires at an in-range enemy and removes it after lethal projectile damage', () => {
     const session = createSimulationSession(testLevel)
-    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 } })
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'basic' })
     for (let index = 0; index < 20; index += 1) session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
     expect(session.getSnapshot().enemies.some((enemy) => enemy.id === 1)).toBe(false)
   })
@@ -178,16 +178,16 @@ describe('createSimulationSession', () => {
   it('validates bounds, route, and occupied placement candidates', () => {
     expect(validatePlacement(testLevel, [], { x: -100, y: 95 })).toMatchObject({ accepted: false, reason: 'bounds' })
     expect(validatePlacement(testLevel, [], { x: 15, y: 5 })).toMatchObject({ accepted: false, reason: 'route' })
-    expect(validatePlacement(testLevel, [{ id: 1, position: { x: 75, y: 75 } }], { x: 75, y: 75 })).toMatchObject({ accepted: false, reason: 'occupied' })
+    expect(validatePlacement(testLevel, [{ id: 1, position: { x: 75, y: 75 }, towerType: 'basic', tier: 0 }], { x: 75, y: 75 })).toMatchObject({ accepted: false, reason: 'occupied' })
     expect(validatePlacement(testLevel, [], { x: 75, y: 75 })).toMatchObject({ accepted: true, position: { x: 75, y: 75 } })
   })
 
   it('commits valid towers, reports rejected placements, and resets placement state', () => {
     const session = createSimulationSession(testLevel)
-    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 } })
-    expect(session.getSnapshot().towers).toEqual([{ id: 1, position: { x: 75, y: 75 } }])
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'basic' })
+    expect(session.getSnapshot().towers).toEqual([{ id: 1, position: { x: 75, y: 75 }, towerType: 'basic', tier: 0 }])
 
-    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 } })
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'basic' })
     expect(session.getSnapshot()).toMatchObject({ lastPlacementRejection: 'occupied' })
     expect(session.getSnapshot().towers).toHaveLength(1)
 
@@ -224,7 +224,7 @@ describe('createSimulationSession', () => {
       combat: { ...testLevel.combat, enemyHealth: 1 },
       outcomes: { ...testLevel.outcomes, waves: [{ enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }] },
     })
-    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 } })
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'basic' })
     for (let index = 0; index < 30; index += 1) session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
 
     expect(session.getSnapshot()).toMatchObject({ phase: 'won', outcome: 'won', wave: 5, enemies: [] })
@@ -238,5 +238,77 @@ describe('createSimulationSession', () => {
     expect(session.getSnapshot()).toMatchObject({ phase: 'lost', outcome: 'lost', baseHealth: 0 })
     session.dispatch({ type: 'restart' })
     expect(session.getSnapshot()).toEqual(createSimulationSession(losingLevel).getSnapshot())
+  })
+
+  it('places typed towers and reports their type and tier', () => {
+    const session = createSimulationSession(testLevel)
+
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'slow' })
+    session.dispatch({ type: 'placeTower', position: { x: 85, y: 85 }, towerType: 'rapid' })
+
+    expect(session.getSnapshot().towers).toEqual([
+      { id: 1, position: { x: 75, y: 75 }, towerType: 'slow', tier: 0 },
+      { id: 2, position: { x: 85, y: 85 }, towerType: 'rapid', tier: 0 },
+    ])
+  })
+
+  it('rejects an undefined tower type without changing tower state', () => {
+    const session = createSimulationSession(testLevel)
+
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'cannon' as 'basic' })
+
+    expect(session.getSnapshot().towers).toEqual([])
+    expect(session.getSnapshot().lastPlacementRejection).toBe('unknownTowerType')
+  })
+
+  it('upgrades a tower exactly once and ignores further upgrades', () => {
+    const session = createSimulationSession(testLevel)
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'basic' })
+
+    session.dispatch({ type: 'upgradeTower', towerId: 1 })
+    expect(session.getSnapshot().towers[0]).toMatchObject({ id: 1, tier: 1 })
+
+    session.dispatch({ type: 'upgradeTower', towerId: 1 })
+    expect(session.getSnapshot().towers[0]).toMatchObject({ id: 1, tier: 1 })
+  })
+
+  it('ignores an upgrade for an unknown tower id', () => {
+    const session = createSimulationSession(testLevel)
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'basic' })
+
+    session.dispatch({ type: 'upgradeTower', towerId: 42 })
+
+    expect(session.getSnapshot().towers[0]).toMatchObject({ id: 1, tier: 0 })
+  })
+
+  it('resets tower types and tiers on restart', () => {
+    const session = createSimulationSession(testLevel)
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'rapid' })
+    session.dispatch({ type: 'upgradeTower', towerId: 1 })
+
+    session.dispatch({ type: 'restart' })
+
+    expect(session.getSnapshot()).toMatchObject({ towers: [], lastPlacementRejection: null })
+  })
+
+  it('produces matching snapshots for typed placement and upgrade sequences', () => {
+    const first = createSimulationSession(testLevel)
+    const second = createSimulationSession(testLevel)
+    const commands = [
+      { type: 'placeTower' as const, position: { x: 75, y: 75 }, towerType: 'slow' as const },
+      { type: 'upgradeTower' as const, towerId: 1 },
+      { type: 'placeTower' as const, position: { x: 85, y: 85 }, towerType: 'rapid' as const },
+      { type: 'upgradeTower' as const, towerId: 1 },
+    ]
+
+    for (const command of commands) {
+      first.dispatch(command)
+      second.dispatch(command)
+      expect(first.getSnapshot()).toEqual(second.getSnapshot())
+    }
+
+    first.update(FIXED_STEP_SECONDS * 5)
+    second.update(FIXED_STEP_SECONDS * 5)
+    expect(first.getSnapshot()).toEqual(second.getSnapshot())
   })
 })

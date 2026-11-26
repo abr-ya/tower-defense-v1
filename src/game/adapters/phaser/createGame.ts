@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 
 import type { ViewportSize } from '../../../app/viewport'
 import { createSimulationSession, prototypeLevel, validatePlacement } from '../../core'
-import type { SimulationSnapshot, WorldPoint } from '../../core'
+import type { SimulationSnapshot, TowerTypeId, WorldPoint } from '../../core'
 
 class BootstrapScene extends Phaser.Scene {
   private readonly session = createSimulationSession()
@@ -14,6 +14,7 @@ class BootstrapScene extends Phaser.Scene {
   private statusText?: Phaser.GameObjects.Text
   private restartButton?: Phaser.GameObjects.Text
   private ignoreNextPlacement = false
+  private selectedTowerType: TowerTypeId = 'basic'
 
   public constructor() {
     super('bootstrap')
@@ -154,7 +155,7 @@ class BootstrapScene extends Phaser.Scene {
       return
     }
     this.previewPosition = this.toWorldPoint(pointer.x, pointer.y)
-    this.session.dispatch({ type: 'placeTower', position: this.previewPosition })
+    this.session.dispatch({ type: 'placeTower', position: this.previewPosition, towerType: this.selectedTowerType })
     this.renderSnapshot()
   }
 

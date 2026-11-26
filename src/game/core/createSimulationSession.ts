@@ -1,5 +1,6 @@
 import { FIXED_STEP_SECONDS, MAX_CATCH_UP_TICKS } from './constants'
 import { prototypeLevel } from '../content/prototypeLevel'
+import { isDefinedTowerType } from '../content/prototypeTowers'
 import { validateLevelDefinition } from './level'
 import { createRouteTraversal, getRoutePosition } from './route'
 import { validatePlacement } from './placement'
@@ -101,14 +102,30 @@ export function createSimulationSession(level: LevelDefinition = prototypeLevel)
           break
         case 'placeTower': {
           if (phase !== 'running') break
+          if (!isDefinedTowerType(command.towerType)) {
+            lastPlacementRejection = 'unknownTowerType'
+            break
+          }
           const result = validatePlacement(level, towers, command.position)
           if (result.accepted) {
-            towers = Object.freeze([...towers, Object.freeze({ id: towers.length + 1, position: result.position })])
+            towers = Object.freeze([
+              ...towers,
+              Object.freeze({ id: towers.length + 1, position: result.position, towerType: command.towerType, tier: 0 }),
+            ])
             cooldowns = Object.freeze([...cooldowns, 0])
             lastPlacementRejection = null
           } else {
             lastPlacementRejection = result.reason
           }
+          break
+        }
+        case 'upgradeTower': {
+          if (phase !== 'running') break
+          const target = towers.find((tower) => tower.id === command.towerId)
+          if (target === undefined || target.tier >= 1) break
+          towers = Object.freeze(
+            towers.map((tower) => (tower.id === command.towerId ? Object.freeze({ ...tower, tier: 1 }) : tower)),
+          )
           break
         }
       }

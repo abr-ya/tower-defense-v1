@@ -1,7 +1,13 @@
 import type { LevelDefinition, WorldPoint } from './level'
+import type { TowerTier, TowerTypeId } from './towers'
 
-export type PlacedTower = Readonly<{ id: number; position: WorldPoint }>
-export type PlacementRejectionReason = 'bounds' | 'route' | 'occupied'
+export type PlacedTower = Readonly<{
+  id: number
+  position: WorldPoint
+  towerType: TowerTypeId
+  tier: TowerTier
+}>
+export type PlacementRejectionReason = 'bounds' | 'route' | 'occupied' | 'unknownTowerType'
 export type PlacementResult =
   | Readonly<{ accepted: true; position: WorldPoint }>
   | Readonly<{ accepted: false; position: WorldPoint; reason: PlacementRejectionReason }>
