@@ -1,6 +1,6 @@
 # Tower Defence — Product Backlog
 
-Status: initial planning | Updated: 2026-11-04
+Status: initial planning | Updated: 2026-11-26
 
 ## Working agreement
 - This file is the ordered source of truth for priorities and status; OpenSpec is the source of truth for the requirements/design of each active change.
@@ -9,6 +9,7 @@ Status: initial planning | Updated: 2026-11-04
 - Name a work branch `<type>-<number>-<short-kebab-slug>` and use the same work-item ID in its OpenSpec change.
 - Each implementation item maps to one OpenSpec change in `openspec/changes/<slug>/` and a PR/commit. Keep change scope reviewable (ideally one playable increment).
 - Do not mark DONE until acceptance criteria, tests and manual smoke check pass, and the OpenSpec change is archived.
+- A manual check that cannot be confirmed before the archive is moved to [`docs/VERIFICATION-BACKLOG.md`](VERIFICATION-BACKLOG.md) by an explicit user decision; the change's tasks keep a pointer to that item, and the check stays listed until it is confirmed.
 - Only one active implementation change at a time at the start; reorder as learning changes.
 
 ## Milestones
@@ -27,7 +28,7 @@ Status: initial planning | Updated: 2026-11-04
 | feature-004 | M1 | High | DONE | Placement preview and validation (`feature-004-tower-placement`) | Valid cells highlighted; invalid cells rejected; mouse/touch input |
 | feature-005 | M1 | High | DONE | Targeting and projectile damage (`feature-005-basic-combat`) | Tower attacks enemies in range; death/reward logic tested |
 | feature-006 | M1 | High | DONE | Waves and base health (`feature-006-waves-and-outcomes`) | Five prototype waves; escapes reduce health; win/lose/restart |
-| feature-007 | M2 | Medium | TODO | Three towers and upgrade (`feature-007-tower-variety`) | Basic, rapid, slow towers and one upgrade tier; data-driven stats |
+| feature-007 | M2 | Medium | DONE | Three towers and upgrade (`feature-007-tower-variety`) | Basic, rapid, slow towers and one upgrade tier; data-driven stats. Landscape touch check deferred to `verify-001` in [`docs/VERIFICATION-BACKLOG.md`](VERIFICATION-BACKLOG.md) |
 | feature-008 | M2 | Medium | TODO | Three enemies and ten waves (`feature-008-enemy-variety`) | Normal, fast, armored enemies; 10 waves with increasing difficulty |
 | feature-009 | M2 | Medium | TODO | Game HUD, economy, controls (`feature-009-game-hud`) | Currency, health, wave, selection, upgrade, pause, restart accessible |
 | feature-010 | M2 | Medium | TODO | Cartoon visual pass and audio (`feature-010-cartoon-art-pass`) | Consistent legible assets, effects, sound toggle; licensed/owned assets |
@@ -48,6 +49,7 @@ Status: initial planning | Updated: 2026-11-04
 - Acceptance scenarios pass; unit tests cover game rules affected.
 - `lint`, `typecheck`, `test`, and `build` pass.
 - Manual smoke test of relevant input/platform behavior.
+- A manual check deferred to [`docs/VERIFICATION-BACKLOG.md`](VERIFICATION-BACKLOG.md) stays open until it is confirmed on its platform.
 - No unapproved scope expansion; docs/backlog updated; OpenSpec change synced (if needed) and archived.
 
 ## Suggested first change
