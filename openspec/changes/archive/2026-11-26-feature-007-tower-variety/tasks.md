@@ -18,8 +18,8 @@
 
 ## 4. Integration verification
 
-- [ ] 4.1 Run lint, typecheck, test, and build under LTS Node; verify all pass.
-- [ ] 4.2 Perform user-confirmed desktop and landscape touch smoke checks: select and place all three types, observe Slow, upgrade each eligible type once, and verify no currency is displayed or spent.
+- [x] 4.1 Run lint, typecheck, test, and build under LTS Node; verify all pass.
+- [x] 4.2 Perform user-confirmed desktop and landscape touch smoke checks: select and place all three types, observe Slow, upgrade each eligible type once, and verify no currency is displayed or spent. The desktop mouse smoke check was confirmed by the user on 2026-11-26; the landscape touch smoke check was moved by the user to `docs/VERIFICATION-BACKLOG.md` as verify-001.
 
 ## Workflow follow-up
 
