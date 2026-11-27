@@ -1,3 +1,6 @@
+import { isEnemyTypeId } from './enemies'
+import type { EnemyTypeId } from './enemies'
+
 export type WorldPoint = Readonly<{
   x: number
   y: number
@@ -13,17 +16,25 @@ export type PlacementConfig = Readonly<{
   towerFootprint: number
   routeExclusionRadius: number
 }>
-export type CombatConfig = Readonly<{ enemyHealth: number }>
-export type WaveDefinition = Readonly<{ enemyCount: number; spawnIntervalSeconds: number }>
+
+export type WaveSpawnGroup = Readonly<{
+  enemyType: EnemyTypeId
+  count: number
+  spawnIntervalSeconds: number
+  startOffsetSeconds: number
+}>
+
+export type WaveDefinition = Readonly<{
+  groups: readonly WaveSpawnGroup[]
+}>
+
 export type OutcomeConfig = Readonly<{ baseHealth: number; escapeDamage: number; waves: readonly WaveDefinition[] }>
 
 export type LevelDefinition = Readonly<{
   id: string
   bounds: WorldBounds
   route: readonly WorldPoint[]
-  enemySpeed: number
   placement: PlacementConfig
-  combat: CombatConfig
   outcomes: OutcomeConfig
 }>
 
@@ -40,18 +51,33 @@ export function validateLevelDefinition(level: LevelDefinition): void {
     throw new RangeError('A level route must contain at least two waypoints.')
   }
 
-  if (!Number.isFinite(level.enemySpeed) || level.enemySpeed <= 0) {
-    throw new RangeError('Enemy speed must be a positive finite number.')
-  }
-
   for (const value of [level.placement.gridSize, level.placement.towerFootprint, level.placement.routeExclusionRadius]) {
     if (!Number.isFinite(value) || value <= 0) {
       throw new RangeError('Placement configuration values must be positive finite numbers.')
     }
   }
-  for (const value of Object.values(level.combat)) if (!Number.isFinite(value) || value <= 0) throw new RangeError('Combat configuration values must be positive finite numbers.')
-  if (level.outcomes.waves.length !== 5 || !Number.isFinite(level.outcomes.baseHealth) || level.outcomes.baseHealth <= 0 || !Number.isFinite(level.outcomes.escapeDamage) || level.outcomes.escapeDamage <= 0) throw new RangeError('Outcome configuration must define five waves and positive base health.')
-  for (const wave of level.outcomes.waves) if (!Number.isInteger(wave.enemyCount) || wave.enemyCount <= 0 || !Number.isFinite(wave.spawnIntervalSeconds) || wave.spawnIntervalSeconds < 0) throw new RangeError('Wave definitions must be valid.')
+
+  if (!Number.isFinite(level.outcomes.baseHealth) || level.outcomes.baseHealth <= 0) {
+    throw new RangeError('Outcome configuration must define positive base health.')
+  }
+
+  if (!Number.isFinite(level.outcomes.escapeDamage) || level.outcomes.escapeDamage <= 0) {
+    throw new RangeError('Outcome configuration must define positive escape damage.')
+  }
+
+  if (level.outcomes.waves.length === 0) {
+    throw new RangeError('A level must define at least one wave.')
+  }
+
+  for (const [waveIndex, wave] of level.outcomes.waves.entries()) {
+    if (wave.groups.length === 0) {
+      throw new RangeError(`Wave ${waveIndex + 1} must define at least one spawn group.`)
+    }
+
+    for (const [groupIndex, group] of wave.groups.entries()) {
+      validateSpawnGroup(waveIndex + 1, groupIndex + 1, group)
+    }
+  }
 
   for (const [index, waypoint] of level.route.entries()) {
     if (!Number.isFinite(waypoint.x) || !Number.isFinite(waypoint.y)) {
@@ -73,5 +99,23 @@ export function validateLevelDefinition(level: LevelDefinition): void {
         throw new RangeError('Route segments must have non-zero length.')
       }
     }
+  }
+}
+
+function validateSpawnGroup(waveNumber: number, groupNumber: number, group: WaveSpawnGroup): void {
+  if (!isEnemyTypeId(group.enemyType)) {
+    throw new RangeError(`Wave ${waveNumber} spawn group ${groupNumber} must reference a defined enemy type.`)
+  }
+
+  if (!Number.isInteger(group.count) || group.count <= 0) {
+    throw new RangeError(`Wave ${waveNumber} spawn group ${groupNumber} must spawn a positive number of enemies.`)
+  }
+
+  if (!Number.isFinite(group.spawnIntervalSeconds) || group.spawnIntervalSeconds < 0) {
+    throw new RangeError(`Wave ${waveNumber} spawn group ${groupNumber} must use a non-negative spawn interval.`)
+  }
+
+  if (!Number.isFinite(group.startOffsetSeconds) || group.startOffsetSeconds < 0) {
+    throw new RangeError(`Wave ${waveNumber} spawn group ${groupNumber} must use a non-negative start offset.`)
   }
 }
