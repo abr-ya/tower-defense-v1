@@ -21,7 +21,7 @@
 ## 4. Integration verification
 
 - [x] 4.1 Run lint, typecheck, test, and build under LTS Node; verify all four pass.
-- [ ] 4.2 Perform user-confirmed browser smoke checks: observe all three enemy families, confirm a mixed-family wave, and play the level through all ten waves to a win or a loss followed by a restart. Move any check that cannot be confirmed on the target platform to `docs/VERIFICATION-BACKLOG.md` by an explicit user decision and keep a pointer here.
+- [x] 4.2 Perform user-confirmed browser smoke checks: observe all three enemy families, confirm a mixed-family wave, and play the level through all ten waves to a win or a loss followed by a restart. Move any check that cannot be confirmed on the target platform to `docs/VERIFICATION-BACKLOG.md` by an explicit user decision and keep a pointer here. The browser smoke check was confirmed by the user on 2026-11-27: every enemy family appears on its wave and the restart resets the run; the full ten-wave playthrough was moved by the user to `docs/VERIFICATION-BACKLOG.md` as verify-002.
 
 ## Workflow follow-up
 
