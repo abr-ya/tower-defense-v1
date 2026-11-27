@@ -11,6 +11,7 @@ import {
   validatePlacement,
 } from '../../core'
 import type { SimulationSnapshot, TowerTypeId, WorldPoint } from '../../core'
+import type { EnemyTypeId } from '../../core'
 import { resolvePointerAction } from './pointerActions'
 import type { GameControl } from './pointerActions'
 
@@ -18,6 +19,12 @@ const TOWER_COLORS: Readonly<Record<TowerTypeId, number>> = {
   basic: 0x78d9c7,
   rapid: 0xffb347,
   slow: 0x9b8cff,
+}
+
+const ENEMY_STYLES: Readonly<Record<EnemyTypeId, Readonly<{ color: number; radius: number }>>> = {
+  normal: { color: 0xf4b942, radius: 12 },
+  fast: { color: 0x8fe388, radius: 9 },
+  armored: { color: 0x9b8cff, radius: 15 },
 }
 
 const CONTROL_BACKGROUND = '#2c3b63'
@@ -256,7 +263,12 @@ class BootstrapScene extends Phaser.Scene {
     for (const [index, enemy] of snapshot.enemies.entries()) {
       const enemyGraphics = this.enemyGraphics[index]
       const [enemyX, enemyY] = this.toScreenPoint(enemy.position, transform)
-      enemyGraphics.setVisible(true).setPosition(enemyX, enemyY).setFillStyle(0xf4b942)
+      const enemyStyle = ENEMY_STYLES[enemy.enemyType]
+      enemyGraphics
+        .setVisible(true)
+        .setPosition(enemyX, enemyY)
+        .setRadius(enemyStyle.radius)
+        .setFillStyle(enemyStyle.color)
       const healthWidth = 28
       const healthRatio = enemy.health / enemy.maxHealth
       this.combatGraphics.fillStyle(0x311c2b, 1)
@@ -274,7 +286,7 @@ class BootstrapScene extends Phaser.Scene {
     this.combatGraphics.fillRect(layout.panelX, layout.panelY, STATUS_PANEL_WIDTH, STATUS_PANEL_HEIGHT)
     this.combatGraphics.fillStyle(0x17233f, 1)
     this.combatGraphics.fillRect(layout.panelX + 2, layout.panelY + 2, STATUS_PANEL_WIDTH - 4, STATUS_PANEL_HEIGHT - 4)
-    this.statusText.setText(`Wave ${snapshot.wave}/5\nBase ${snapshot.baseHealth}${outcomeText ? `\n${outcomeText}` : ''}`)
+    this.statusText.setText(`Wave ${snapshot.wave}/${snapshot.waveCount}\nBase ${snapshot.baseHealth}${outcomeText ? `\n${outcomeText}` : ''}`)
     this.statusText.setColor(outcomeText === 'DEFEAT' ? '#ef6a6a' : outcomeText === 'VICTORY' ? '#8fe388' : '#ffffff')
     this.restartButton.setVisible(snapshot.outcome !== 'playing')
   }

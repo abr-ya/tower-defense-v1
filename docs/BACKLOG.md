@@ -29,7 +29,7 @@ Status: initial planning | Updated: 2026-11-27
 | feature-005 | M1 | High | DONE | Targeting and projectile damage (`feature-005-basic-combat`) | Tower attacks enemies in range; death/reward logic tested |
 | feature-006 | M1 | High | DONE | Waves and base health (`feature-006-waves-and-outcomes`) | Five prototype waves; escapes reduce health; win/lose/restart |
 | feature-007 | M2 | Medium | DONE | Three towers and upgrade (`feature-007-tower-variety`) | Basic, rapid, slow towers and one upgrade tier; data-driven stats. Landscape touch check deferred to `verify-001` in [`docs/VERIFICATION-BACKLOG.md`](VERIFICATION-BACKLOG.md) |
-| feature-008 | M2 | Medium | TODO | Three enemies and ten waves (`feature-008-enemy-variety`) | Normal, fast, armored enemies; 10 waves with increasing difficulty |
+| feature-008 | M2 | Medium | IN PROGRESS | Three enemies and ten waves (`feature-008-enemy-variety`) | Normal, fast, armored enemies; 10 waves with increasing difficulty |
 | feature-009 | M2 | Medium | TODO | Game HUD, economy, controls (`feature-009-game-hud`) | Currency, health, wave, selection, upgrade, pause, restart accessible |
 | feature-010 | M2 | Medium | TODO | Cartoon visual pass (`feature-010-cartoon-art-pass`) | Consistent legible assets and effects; licensed/owned assets. Audio moved to `feature-019` and `feature-020` |
 | feature-011 | M2 | Medium | TODO | Local settings/progression (`feature-011-local-progress`) | Versioned persistence, graceful recovery, completion retained |
