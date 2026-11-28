@@ -11,13 +11,30 @@ import {
   createWaveSchedule,
 } from './index'
 import type {
+  EnemyDefinition,
+  EnemyTypeId,
   LevelDefinition,
   SimulationSession,
   SimulationSnapshot,
   TowerAttackStats,
   TowerDefinition,
   TowerTypeId,
+  WaveDefinition,
+  WaveSpawnGroup,
 } from './index'
+
+function groupOf(
+  enemyType: EnemyTypeId,
+  count = 1,
+  spawnIntervalSeconds = 0,
+  startOffsetSeconds = 0,
+): WaveSpawnGroup {
+  return { enemyType, count, spawnIntervalSeconds, startOffsetSeconds }
+}
+
+function waveOf(...groups: readonly WaveSpawnGroup[]): WaveDefinition {
+  return { groups }
+}
 
 const testLevel: LevelDefinition = {
   id: 'test-route',
@@ -27,11 +44,58 @@ const testLevel: LevelDefinition = {
     { x: 30, y: 0 },
     { x: 30, y: 40 },
   ],
-  enemySpeed: 60,
   placement: { gridSize: 10, towerFootprint: 8, routeExclusionRadius: 2 },
-  combat: { enemyHealth: 100 },
-  outcomes: { baseHealth: 3, escapeDamage: 1, waves: [{ enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }] },
+  outcomes: {
+    baseHealth: 3,
+    escapeDamage: 1,
+    waves: [
+      waveOf(groupOf('normal')),
+      waveOf(groupOf('normal')),
+      waveOf(groupOf('normal')),
+      waveOf(groupOf('normal')),
+      waveOf(groupOf('normal')),
+    ],
+  },
 }
+
+const testEnemies: readonly EnemyDefinition[] = [
+  { id: 'normal', name: 'Normal', speed: 60, health: 100, armor: 0 },
+  { id: 'fast', name: 'Fast', speed: 120, health: 100, armor: 0 },
+  { id: 'armored', name: 'Armored', speed: 60, health: 100, armor: 0 },
+]
+
+const combatLevel: LevelDefinition = {
+  id: 'combat-route',
+  bounds: { width: 300, height: 200 },
+  route: [
+    { x: 0, y: 100 },
+    { x: 300, y: 100 },
+  ],
+  placement: { gridSize: 10, towerFootprint: 8, routeExclusionRadius: 2 },
+  outcomes: {
+    baseHealth: 5,
+    escapeDamage: 1,
+    waves: [
+      waveOf(groupOf('normal')),
+      waveOf(groupOf('normal')),
+      waveOf(groupOf('normal')),
+      waveOf(groupOf('normal')),
+      waveOf(groupOf('normal')),
+    ],
+  },
+}
+
+const combatEnemies: readonly EnemyDefinition[] = [
+  { id: 'normal', name: 'Normal', speed: 10, health: 1000, armor: 0 },
+  { id: 'fast', name: 'Fast', speed: 20, health: 1000, armor: 0 },
+  { id: 'armored', name: 'Armored', speed: 10, health: 1000, armor: 0 },
+]
+
+const armorEnemies: readonly EnemyDefinition[] = [
+  { id: 'normal', name: 'Normal', speed: 10, health: 100, armor: 0 },
+  { id: 'fast', name: 'Fast', speed: 10, health: 100, armor: 0 },
+  { id: 'armored', name: 'Armored', speed: 10, health: 100, armor: 5 },
+]
 
 const testTowers: readonly TowerDefinition[] = [
   {
@@ -78,29 +142,6 @@ const testTowers: readonly TowerDefinition[] = [
   },
 ]
 
-const combatLevel: LevelDefinition = {
-  id: 'combat-route',
-  bounds: { width: 300, height: 200 },
-  route: [
-    { x: 0, y: 100 },
-    { x: 300, y: 100 },
-  ],
-  enemySpeed: 10,
-  placement: { gridSize: 10, towerFootprint: 8, routeExclusionRadius: 2 },
-  combat: { enemyHealth: 1000 },
-  outcomes: {
-    baseHealth: 5,
-    escapeDamage: 1,
-    waves: [
-      { enemyCount: 1, spawnIntervalSeconds: 0 },
-      { enemyCount: 1, spawnIntervalSeconds: 0 },
-      { enemyCount: 1, spawnIntervalSeconds: 0 },
-      { enemyCount: 1, spawnIntervalSeconds: 0 },
-      { enemyCount: 1, spawnIntervalSeconds: 0 },
-    ],
-  },
-}
-
 const combatTowers: readonly TowerDefinition[] = [
   {
     id: 'basic',
@@ -136,23 +177,11 @@ const combatTowers: readonly TowerDefinition[] = [
     tiers: [
       {
         tier: 0,
-        stats: {
-          range: 120,
-          cooldownSeconds: 0.5,
-          projectileSpeed: 240,
-          projectileDamage: 10,
-          effect: { kind: 'slow', durationSeconds: 1.5, speedMultiplier: 0.5 },
-        },
+        stats: { range: 120, cooldownSeconds: 0.5, projectileSpeed: 240, projectileDamage: 10, effect: { kind: 'slow', durationSeconds: 1.5, speedMultiplier: 0.5 } },
       },
       {
         tier: 1,
-        stats: {
-          range: 150,
-          cooldownSeconds: 0.4,
-          projectileSpeed: 300,
-          projectileDamage: 15,
-          effect: { kind: 'slow', durationSeconds: 2.5, speedMultiplier: 0.4 },
-        },
+        stats: { range: 150, cooldownSeconds: 0.4, projectileSpeed: 300, projectileDamage: 15, effect: { kind: 'slow', durationSeconds: 2.5, speedMultiplier: 0.4 } },
       },
     ],
   },
@@ -271,7 +300,7 @@ describe('createSimulationSession', () => {
   })
 
   it('traverses route segments at a stable speed and crosses waypoints', () => {
-    const session = createSimulationSession(testLevel, testTowers)
+    const session = createSimulationSession(testLevel, testTowers, testEnemies)
 
     for (let index = 0; index < 6; index += 1) {
       session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
@@ -288,14 +317,14 @@ describe('createSimulationSession', () => {
   })
 
   it('fires at an in-range enemy and removes it after lethal projectile damage', () => {
-    const session = createSimulationSession(testLevel, testTowers)
+    const session = createSimulationSession(testLevel, testTowers, testEnemies)
     session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'basic' })
     for (let index = 0; index < 20; index += 1) session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
     expect(session.getSnapshot().enemies.some((enemy) => enemy.id === 1)).toBe(false)
   })
 
   it('removes escaped enemies and reduces base health', () => {
-    const session = createSimulationSession(testLevel, testTowers)
+    const session = createSimulationSession(testLevel, testTowers, testEnemies)
     for (let index = 0; index < 20; index += 1) session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
 
     expect(session.getSnapshot()).toMatchObject({ baseHealth: 2 })
@@ -315,7 +344,7 @@ describe('createSimulationSession', () => {
   })
 
   it('commits valid towers, reports rejected placements, and resets placement state', () => {
-    const session = createSimulationSession(testLevel, testTowers)
+    const session = createSimulationSession(testLevel, testTowers, testEnemies)
     session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'basic' })
     expect(session.getSnapshot().towers).toEqual([{ id: 1, position: { x: 75, y: 75 }, towerType: 'basic', tier: 0 }])
 
@@ -327,22 +356,24 @@ describe('createSimulationSession', () => {
     expect(session.getSnapshot()).toMatchObject({ towers: [], lastPlacementRejection: null })
   })
 
-  it('creates an ordered five-wave schedule from authored content', () => {
+  it('creates an ordered wave schedule from authored content', () => {
     expect(createWaveSchedule(testLevel.outcomes.waves)).toEqual([
-      { wave: 1, enemyCount: 1, spawnIntervalSeconds: 0 },
-      { wave: 2, enemyCount: 1, spawnIntervalSeconds: 0 },
-      { wave: 3, enemyCount: 1, spawnIntervalSeconds: 0 },
-      { wave: 4, enemyCount: 1, spawnIntervalSeconds: 0 },
-      { wave: 5, enemyCount: 1, spawnIntervalSeconds: 0 },
+      { wave: 1, groups: testLevel.outcomes.waves[0].groups },
+      { wave: 2, groups: testLevel.outcomes.waves[1].groups },
+      { wave: 3, groups: testLevel.outcomes.waves[2].groups },
+      { wave: 4, groups: testLevel.outcomes.waves[3].groups },
+      { wave: 5, groups: testLevel.outcomes.waves[4].groups },
     ])
   })
 
   it('spawns each wave in authored order and timing', () => {
     const session = createSimulationSession({
       ...testLevel,
-      enemySpeed: 1,
-      outcomes: { ...testLevel.outcomes, waves: [{ enemyCount: 2, spawnIntervalSeconds: 0.1 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }] },
-    }, testTowers)
+      outcomes: {
+        ...testLevel.outcomes,
+        waves: [waveOf(groupOf('normal', 2, 0.1)), ...testLevel.outcomes.waves.slice(1)],
+      },
+    }, testTowers, testEnemies)
 
     session.update(FIXED_STEP_SECONDS)
     expect(session.getSnapshot().enemies.map((enemy) => enemy.id)).toEqual([1])
@@ -350,30 +381,33 @@ describe('createSimulationSession', () => {
     expect(session.getSnapshot().enemies.map((enemy) => enemy.id)).toEqual([1, 2])
   })
 
-  it('reports victory after all five waves are defeated', () => {
+  it('reports victory after all authored waves are defeated', () => {
     const session = createSimulationSession({
       ...testLevel,
-      combat: { ...testLevel.combat, enemyHealth: 1 },
-      outcomes: { ...testLevel.outcomes, waves: [{ enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }, { enemyCount: 1, spawnIntervalSeconds: 0 }] },
-    }, testTowers)
+      outcomes: { ...testLevel.outcomes, waves: testLevel.outcomes.waves },
+    }, testTowers, [
+      { id: 'normal', name: 'Normal', speed: 60, health: 1, armor: 0 },
+      { id: 'fast', name: 'Fast', speed: 60, health: 1, armor: 0 },
+      { id: 'armored', name: 'Armored', speed: 60, health: 1, armor: 0 },
+    ])
     session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'basic' })
     for (let index = 0; index < 30; index += 1) session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
 
-    expect(session.getSnapshot()).toMatchObject({ phase: 'won', outcome: 'won', wave: 5, enemies: [] })
+    expect(session.getSnapshot()).toMatchObject({ phase: 'won', outcome: 'won', wave: 5, waveCount: 5, enemies: [] })
   })
 
   it('reports loss and restart restores an equivalent fresh session', () => {
     const losingLevel = { ...testLevel, outcomes: { ...testLevel.outcomes, baseHealth: 1 } }
-    const session = createSimulationSession(losingLevel, testTowers)
+    const session = createSimulationSession(losingLevel, testTowers, testEnemies)
     for (let index = 0; index < 20; index += 1) session.update(FIXED_STEP_SECONDS * MAX_CATCH_UP_TICKS)
 
     expect(session.getSnapshot()).toMatchObject({ phase: 'lost', outcome: 'lost', baseHealth: 0 })
     session.dispatch({ type: 'restart' })
-    expect(session.getSnapshot()).toEqual(createSimulationSession(losingLevel, testTowers).getSnapshot())
+    expect(session.getSnapshot()).toEqual(createSimulationSession(losingLevel, testTowers, testEnemies).getSnapshot())
   })
 
   it('places typed towers and reports their type and tier', () => {
-    const session = createSimulationSession(testLevel, testTowers)
+    const session = createSimulationSession(testLevel, testTowers, testEnemies)
 
     session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'slow' })
     session.dispatch({ type: 'placeTower', position: { x: 85, y: 85 }, towerType: 'rapid' })
@@ -385,7 +419,7 @@ describe('createSimulationSession', () => {
   })
 
   it('rejects an undefined tower type without changing tower state', () => {
-    const session = createSimulationSession(testLevel, testTowers)
+    const session = createSimulationSession(testLevel, testTowers, testEnemies)
 
     session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'cannon' as 'basic' })
 
@@ -394,7 +428,7 @@ describe('createSimulationSession', () => {
   })
 
   it('upgrades a tower exactly once and ignores further upgrades', () => {
-    const session = createSimulationSession(testLevel, testTowers)
+    const session = createSimulationSession(testLevel, testTowers, testEnemies)
     session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'basic' })
 
     session.dispatch({ type: 'upgradeTower', towerId: 1 })
@@ -405,7 +439,7 @@ describe('createSimulationSession', () => {
   })
 
   it('ignores an upgrade for an unknown tower id', () => {
-    const session = createSimulationSession(testLevel, testTowers)
+    const session = createSimulationSession(testLevel, testTowers, testEnemies)
     session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'basic' })
 
     session.dispatch({ type: 'upgradeTower', towerId: 42 })
@@ -414,7 +448,7 @@ describe('createSimulationSession', () => {
   })
 
   it('resets tower types and tiers on restart', () => {
-    const session = createSimulationSession(testLevel, testTowers)
+    const session = createSimulationSession(testLevel, testTowers, testEnemies)
     session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'rapid' })
     session.dispatch({ type: 'upgradeTower', towerId: 1 })
 
@@ -424,8 +458,8 @@ describe('createSimulationSession', () => {
   })
 
   it('produces matching snapshots for typed placement and upgrade sequences', () => {
-    const first = createSimulationSession(testLevel, testTowers)
-    const second = createSimulationSession(testLevel, testTowers)
+    const first = createSimulationSession(testLevel, testTowers, testEnemies)
+    const second = createSimulationSession(testLevel, testTowers, testEnemies)
     const commands = [
       { type: 'placeTower' as const, position: { x: 75, y: 75 }, towerType: 'slow' as const },
       { type: 'upgradeTower' as const, towerId: 1 },
@@ -445,15 +479,15 @@ describe('createSimulationSession', () => {
   })
 
   it('fires a projectile with the attack statistics of the placed tower type', () => {
-    const basic = createSimulationSession(combatLevel, combatTowers)
+    const basic = createSimulationSession(combatLevel, combatTowers, combatEnemies)
     basic.dispatch({ type: 'placeTower', position: { x: 55, y: 125 }, towerType: 'basic' })
     basic.update(FIXED_STEP_SECONDS)
 
-    const rapid = createSimulationSession(combatLevel, combatTowers)
+    const rapid = createSimulationSession(combatLevel, combatTowers, combatEnemies)
     rapid.dispatch({ type: 'placeTower', position: { x: 55, y: 125 }, towerType: 'rapid' })
     rapid.update(FIXED_STEP_SECONDS)
 
-    const slow = createSimulationSession(combatLevel, combatTowers)
+    const slow = createSimulationSession(combatLevel, combatTowers, combatEnemies)
     slow.dispatch({ type: 'placeTower', position: { x: 55, y: 125 }, towerType: 'slow' })
     slow.update(FIXED_STEP_SECONDS)
 
@@ -475,7 +509,7 @@ describe('createSimulationSession', () => {
   })
 
   it('fires with the upgraded tier statistics after an upgrade', () => {
-    const session = createSimulationSession(combatLevel, combatTowers)
+    const session = createSimulationSession(combatLevel, combatTowers, combatEnemies)
     session.dispatch({ type: 'placeTower', position: { x: 55, y: 125 }, towerType: 'slow' })
 
     session.dispatch({ type: 'upgradeTower', towerId: 1 })
@@ -492,6 +526,7 @@ describe('createSimulationSession', () => {
     const session = createSimulationSession(
       combatLevel,
       towerDefinition('basic', { range: 30, cooldownSeconds: 0.5, projectileSpeed: 240, projectileDamage: 25, effect: { kind: 'none' } }),
+      combatEnemies,
     )
     session.dispatch({ type: 'placeTower', position: { x: 55, y: 125 }, towerType: 'basic' })
 
@@ -526,10 +561,10 @@ describe('createSimulationSession', () => {
       },
     ]
 
-    const basic = createSimulationSession(combatLevel, slowFlightTowers)
+    const basic = createSimulationSession(combatLevel, slowFlightTowers, combatEnemies)
     basic.dispatch({ type: 'placeTower', position: { x: 135, y: 125 }, towerType: 'basic' })
 
-    const rapid = createSimulationSession(combatLevel, slowFlightTowers)
+    const rapid = createSimulationSession(combatLevel, slowFlightTowers, combatEnemies)
     rapid.dispatch({ type: 'placeTower', position: { x: 135, y: 125 }, towerType: 'rapid' })
 
     advanceTicks(basic, 120)
@@ -545,7 +580,7 @@ describe('createSimulationSession', () => {
   })
 
   it('applies the slow effect to an enemy that is hit', () => {
-    const session = createSimulationSession(combatLevel, combatTowers)
+    const session = createSimulationSession(combatLevel, combatTowers, combatEnemies)
     session.dispatch({ type: 'placeTower', position: { x: 55, y: 125 }, towerType: 'slow' })
 
     const applied = advanceUntil(session, (snapshot) => (snapshot.enemies[0]?.slowRemainingSeconds ?? 0) > 0)
@@ -557,7 +592,7 @@ describe('createSimulationSession', () => {
   })
 
   it('refreshes the slow duration instead of stacking it', () => {
-    const session = createSimulationSession(combatLevel, combatTowers)
+    const session = createSimulationSession(combatLevel, combatTowers, combatEnemies)
     session.dispatch({ type: 'placeTower', position: { x: 55, y: 125 }, towerType: 'slow' })
 
     advanceUntil(session, (snapshot) => (snapshot.enemies[0]?.slowRemainingSeconds ?? 0) > 0)
@@ -587,6 +622,7 @@ describe('createSimulationSession', () => {
         projectileDamage: 10,
         effect: { kind: 'slow', durationSeconds: 0.5, speedMultiplier: 0.5 },
       }),
+      combatEnemies,
     )
     session.dispatch({ type: 'placeTower', position: { x: 55, y: 125 }, towerType: 'slow' })
 
@@ -602,7 +638,7 @@ describe('createSimulationSession', () => {
   })
 
   it('moves an enemy slower while the slow effect is active', () => {
-    const session = createSimulationSession(combatLevel, combatTowers)
+    const session = createSimulationSession(combatLevel, combatTowers, combatEnemies)
     session.dispatch({ type: 'placeTower', position: { x: 55, y: 125 }, towerType: 'slow' })
 
     advanceUntil(session, (snapshot) => (snapshot.enemies[0]?.slowRemainingSeconds ?? 0) > 0)
@@ -610,7 +646,7 @@ describe('createSimulationSession', () => {
     advanceTicks(session, 60)
     const slowedDistance = (session.getSnapshot().enemies[0]?.position.x ?? 0) - slowedStart
 
-    const normalSession = createSimulationSession(combatLevel, combatTowers)
+    const normalSession = createSimulationSession(combatLevel, combatTowers, combatEnemies)
     normalSession.update(FIXED_STEP_SECONDS)
     const normalStart = normalSession.getSnapshot().enemies[0]?.position.x ?? 0
     advanceTicks(normalSession, 60)
@@ -622,13 +658,186 @@ describe('createSimulationSession', () => {
   })
 })
 
+describe('enemy families in the simulation', () => {
+  it('reports the family, armor, and health of every living enemy', () => {
+    const session = createSimulationSession({
+      ...testLevel,
+      outcomes: { ...testLevel.outcomes, waves: [waveOf(groupOf('armored')), ...testLevel.outcomes.waves.slice(1)] },
+    }, testTowers, armorEnemies)
+
+    session.update(FIXED_STEP_SECONDS)
+
+    expect(session.getSnapshot().enemies[0]).toMatchObject({
+      enemyType: 'armored',
+      armor: 5,
+      health: 100,
+      maxHealth: 100,
+    })
+  })
+
+  it('moves a Fast enemy further than a Normal enemy in the same time', () => {
+    const fastSession = createSimulationSession({
+      ...combatLevel,
+      outcomes: { ...combatLevel.outcomes, waves: [waveOf(groupOf('fast')), ...combatLevel.outcomes.waves.slice(1)] },
+    }, testTowers, testEnemies)
+    const normalSession = createSimulationSession(combatLevel, testTowers, testEnemies)
+
+    advanceTicks(fastSession, 30)
+    advanceTicks(normalSession, 30)
+
+    expect(fastSession.getSnapshot().enemies[0]?.position.x).toBeGreaterThan(
+      normalSession.getSnapshot().enemies[0]?.position.x ?? 0,
+    )
+    expect(fastSession.getSnapshot().enemies[0]?.speed).toBe(120)
+    expect(normalSession.getSnapshot().enemies[0]?.speed).toBe(60)
+  })
+
+  it('keeps the enemy family while the slow effect scales its speed', () => {
+    const session = createSimulationSession({
+      ...testLevel,
+      outcomes: { ...testLevel.outcomes, waves: [waveOf(groupOf('fast')), ...testLevel.outcomes.waves.slice(1)] },
+    }, testTowers, testEnemies)
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'slow' })
+
+    advanceUntil(session, (snapshot) => (snapshot.enemies[0]?.slowRemainingSeconds ?? 0) > 0)
+
+    expect(session.getSnapshot().enemies[0]).toMatchObject({
+      enemyType: 'fast',
+      speed: 60,
+    })
+  })
+
+  it('reduces projectile damage by the armor of the target', () => {
+    const session = createSimulationSession({
+      ...combatLevel,
+      outcomes: { ...combatLevel.outcomes, waves: [waveOf(groupOf('armored')), ...combatLevel.outcomes.waves.slice(1)] },
+    }, towerDefinition('basic', { range: 120, cooldownSeconds: 0.5, projectileSpeed: 240, projectileDamage: 20, effect: { kind: 'none' } }), armorEnemies)
+    session.dispatch({ type: 'placeTower', position: { x: 55, y: 125 }, towerType: 'basic' })
+
+    advanceUntil(session, (snapshot) => (snapshot.enemies[0]?.health ?? 100) < 100)
+
+    expect(session.getSnapshot().enemies[0]?.health).toBe(85)
+  })
+
+  it('applies at least one damage against heavy armor', () => {
+    const session = createSimulationSession({
+      ...combatLevel,
+      outcomes: { ...combatLevel.outcomes, waves: [waveOf(groupOf('armored')), ...combatLevel.outcomes.waves.slice(1)] },
+    }, towerDefinition('basic', { range: 120, cooldownSeconds: 0.5, projectileSpeed: 240, projectileDamage: 4, effect: { kind: 'none' } }), armorEnemies)
+    session.dispatch({ type: 'placeTower', position: { x: 55, y: 125 }, towerType: 'basic' })
+
+    advanceUntil(session, (snapshot) => (snapshot.enemies[0]?.health ?? 100) < 100)
+
+    expect(session.getSnapshot().enemies[0]?.health).toBe(99)
+  })
+
+  it('removes an armored enemy once its health reaches zero', () => {
+    const session = createSimulationSession({
+      ...combatLevel,
+      outcomes: { ...combatLevel.outcomes, waves: [waveOf(groupOf('armored')), ...combatLevel.outcomes.waves.slice(1)] },
+    }, towerDefinition('basic', { range: 120, cooldownSeconds: 0.5, projectileSpeed: 240, projectileDamage: 20, effect: { kind: 'none' } }), [
+      { id: 'normal', name: 'Normal', speed: 10, health: 10, armor: 0 },
+      { id: 'fast', name: 'Fast', speed: 10, health: 10, armor: 0 },
+      { id: 'armored', name: 'Armored', speed: 10, health: 10, armor: 5 },
+    ])
+    session.dispatch({ type: 'placeTower', position: { x: 55, y: 125 }, towerType: 'basic' })
+
+    advanceUntil(session, (snapshot) => snapshot.enemies.length === 0, 300)
+
+    expect(session.getSnapshot().enemies).toEqual([])
+  })
+})
+
+describe('spawn groups in the simulation', () => {
+  it('spawns a group only after its start offset', () => {
+    const session = createSimulationSession({
+      ...testLevel,
+      outcomes: {
+        ...testLevel.outcomes,
+        waves: [waveOf(groupOf('normal', 1, 0, 1)), ...testLevel.outcomes.waves.slice(1)],
+      },
+    }, testTowers, testEnemies)
+
+    advanceTicks(session, 59)
+    expect(session.getSnapshot().enemies).toHaveLength(0)
+
+    advanceTicks(session, 1)
+    expect(session.getSnapshot().enemies).toHaveLength(1)
+  })
+
+  it('spawns the enemies of a group one interval apart', () => {
+    const session = createSimulationSession({
+      ...testLevel,
+      outcomes: {
+        ...testLevel.outcomes,
+        waves: [waveOf(groupOf('normal', 2, 0.5)), ...testLevel.outcomes.waves.slice(1)],
+      },
+    }, testTowers, testEnemies)
+
+    advanceTicks(session, 1)
+    expect(session.getSnapshot().enemies).toHaveLength(1)
+
+    advanceTicks(session, 29)
+    expect(session.getSnapshot().enemies).toHaveLength(2)
+  })
+
+  it('spawns the families of one wave from their own groups', () => {
+    const session = createSimulationSession({
+      ...testLevel,
+      outcomes: {
+        ...testLevel.outcomes,
+        waves: [waveOf(groupOf('normal'), groupOf('fast')), ...testLevel.outcomes.waves.slice(1)],
+      },
+    }, testTowers, testEnemies)
+
+    advanceTicks(session, 1)
+
+    expect(session.getSnapshot().enemies.map((enemy) => enemy.enemyType)).toEqual(['normal', 'fast'])
+  })
+
+  it('exposes the authored wave count in the snapshot', () => {
+    expect(createSimulationSession().getSnapshot()).toMatchObject({ wave: 1, waveCount: 10 })
+    expect(createSimulationSession(testLevel, testTowers, testEnemies).getSnapshot()).toMatchObject({ wave: 1, waveCount: 5 })
+  })
+
+  it('advances to the next wave after the last enemy of a wave is defeated', () => {
+    const session = createSimulationSession(testLevel, testTowers, [
+      { id: 'normal', name: 'Normal', speed: 60, health: 1, armor: 0 },
+      { id: 'fast', name: 'Fast', speed: 60, health: 1, armor: 0 },
+      { id: 'armored', name: 'Armored', speed: 60, health: 1, armor: 0 },
+    ])
+    session.dispatch({ type: 'placeTower', position: { x: 75, y: 75 }, towerType: 'basic' })
+
+    advanceUntil(session, (snapshot) => snapshot.wave === 2, 300)
+
+    expect(session.getSnapshot()).toMatchObject({ wave: 2, waveCount: 5 })
+  })
+})
+
+describe('target selection', () => {
+  it('resolves equally distant enemies by the lower identifier', () => {
+    const session = createSimulationSession({
+      ...combatLevel,
+      outcomes: { ...combatLevel.outcomes, waves: [waveOf(groupOf('normal', 2)), ...combatLevel.outcomes.waves.slice(1)] },
+    }, combatTowers, combatEnemies)
+    session.dispatch({ type: 'placeTower', position: { x: 55, y: 125 }, towerType: 'basic' })
+
+    session.update(FIXED_STEP_SECONDS)
+
+    expect(session.getSnapshot().projectiles[0]).toMatchObject({ targetId: 1 })
+  })
+})
+
 function towerDefinition(id: TowerTypeId, stats: TowerAttackStats): readonly TowerDefinition[] {
   return [
     {
       id,
       name: id,
       tiers: [
-        { tier: 0, stats },
+        {
+          tier: 0,
+          stats,
+        },
         {
           tier: 1,
           stats: {

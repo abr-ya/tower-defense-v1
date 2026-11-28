@@ -1,6 +1,6 @@
 # Tower Defence — Product Backlog
 
-Status: initial planning | Updated: 2026-11-26
+Status: initial planning | Updated: 2026-11-27
 
 ## Working agreement
 - This file is the ordered source of truth for priorities and status; OpenSpec is the source of truth for the requirements/design of each active change.
@@ -29,11 +29,13 @@ Status: initial planning | Updated: 2026-11-26
 | feature-005 | M1 | High | DONE | Targeting and projectile damage (`feature-005-basic-combat`) | Tower attacks enemies in range; death/reward logic tested |
 | feature-006 | M1 | High | DONE | Waves and base health (`feature-006-waves-and-outcomes`) | Five prototype waves; escapes reduce health; win/lose/restart |
 | feature-007 | M2 | Medium | DONE | Three towers and upgrade (`feature-007-tower-variety`) | Basic, rapid, slow towers and one upgrade tier; data-driven stats. Landscape touch check deferred to `verify-001` in [`docs/VERIFICATION-BACKLOG.md`](VERIFICATION-BACKLOG.md) |
-| feature-008 | M2 | Medium | TODO | Three enemies and ten waves (`feature-008-enemy-variety`) | Normal, fast, armored enemies; 10 waves with increasing difficulty |
-| feature-009 | M2 | Medium | TODO | Game HUD, economy, controls (`feature-009-game-hud`) | Currency, health, wave, selection, upgrade, pause, restart accessible |
-| feature-010 | M2 | Medium | TODO | Cartoon visual pass and audio (`feature-010-cartoon-art-pass`) | Consistent legible assets, effects, sound toggle; licensed/owned assets |
+| feature-008 | M2 | Medium | DONE | Three enemies and ten waves (`feature-008-enemy-variety`) | Normal, fast, armored enemies; 10 waves with increasing difficulty. Full ten-wave playthrough deferred to `verify-002` in [`docs/VERIFICATION-BACKLOG.md`](VERIFICATION-BACKLOG.md) |
+| feature-009 | M2 | Medium | TODO | Game HUD, economy, controls (`feature-009-game-hud`) | Currency, health, wave, selection, upgrade, pause, restart accessible; the game title must not cover the tower type controls |
+| feature-010 | M2 | Medium | TODO | Cartoon visual pass (`feature-010-cartoon-art-pass`) | Consistent legible assets and effects; licensed/owned assets. Audio moved to `feature-019` and `feature-020` |
 | feature-011 | M2 | Medium | TODO | Local settings/progression (`feature-011-local-progress`) | Versioned persistence, graceful recovery, completion retained |
 | feature-012 | M2 | Medium | TODO | Browser MVP QA and balancing (`feature-012-mvp-qa`) | End-to-end playthrough, mobile/desktop checks, no blocking bugs |
+| feature-019 | M2 | Medium | TODO | Chiptune audio engine and sound effects (`feature-019-chiptune-audio-engine`) | In-code chiptune synth (pulse/triangle/noise) plays firing, placement, upgrade, enemy death, base damage, wave start, victory and defeat sounds; separate music/SFX volume with a mute toggle; audio unlocks on the first user gesture; the simulation stays audio-free and sounds are triggered by typed simulation events |
+| feature-020 | M2 | Low | TODO | Background music (`feature-020-background-music`) | Original chiptune loops (menu and battle) loop seamlessly, follow the game phase, respect mute and music volume, and do not restart on every wave; own composition, no third-party audio assets |
 | feature-013 | M3 | Low | TODO | Mobile usability polish (`feature-013-mobile-polish`) | Touch targets, camera/layout, safe areas, landscape testing |
 | feature-014 | M3 | Low | TODO | PWA offline mode (`feature-014-pwa-offline`) | Installable; cached gameplay works offline after first load |
 | feature-015 | M4 | Low | TODO | More maps and campaign (`feature-015-campaign-levels`) | Level selection and independently configured levels |

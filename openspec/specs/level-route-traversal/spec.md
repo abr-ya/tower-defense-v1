@@ -22,12 +22,12 @@ The system SHALL define one level with logical world bounds and an ordered route
 
 ### Requirement: Deterministic waypoint traversal
 
-The simulation SHALL expose one enemy position that advances along the authored route at a configured constant logical speed, traversing segments in route order.
+The simulation SHALL expose one enemy position per spawned enemy that advances along the authored route at the speed configured for that enemy's family, traversing segments in route order.
 
 #### Scenario: Enemy crosses a waypoint
 
 - **WHEN** elapsed simulation time carries the enemy past a route waypoint
-- **THEN** the enemy continues from that waypoint toward the next segment without changing configured speed
+- **THEN** the enemy continues from that waypoint toward the next segment without changing its family speed
 
 #### Scenario: Equivalent sessions traverse identically
 
@@ -45,9 +45,9 @@ The simulation SHALL mark the enemy as having completed the route when it reache
 
 ### Requirement: Visible route traversal
 
-The browser game surface SHALL render the authored route and moving enemy from read-only simulation snapshots, allowing a player to observe movement without controlling gameplay.
+The browser game surface SHALL render the authored route and its enemies from read-only simulation snapshots, allowing a player to observe movement without controlling gameplay.
 
 #### Scenario: Browser prototype is opened
 
 - **WHEN** a player opens the browser application
-- **THEN** the route and one enemy are visible and the enemy moves along the route
+- **THEN** the route and its enemies are visible and the enemies move along the route

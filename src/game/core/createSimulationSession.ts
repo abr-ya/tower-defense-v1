@@ -1,12 +1,15 @@
 import { FIXED_STEP_SECONDS, MAX_CATCH_UP_TICKS } from './constants'
+import { prototypeEnemies } from '../content/prototypeEnemies'
 import { prototypeLevel } from '../content/prototypeLevel'
 import { prototypeTowers } from '../content/prototypeTowers'
+import { findEnemyDefinition, resolveDamageAgainstArmor } from './enemies'
 import { validateLevelDefinition } from './level'
 import { createRouteTraversal, getRoutePosition } from './route'
 import { validatePlacement } from './placement'
 import { findTowerDefinition, resolveTowerStats } from './towers'
 import { createWaveSchedule } from './waves'
 
+import type { EnemyDefinition, EnemyTypeId } from './enemies'
 import type {
   GameOutcome,
   ProjectileSnapshot,
@@ -18,10 +21,15 @@ import type {
 import type { LevelDefinition, WorldPoint } from './level'
 import type { PlacementRejectionReason } from './placement'
 import type { TowerAttackStats, TowerDefinition, TowerTier, TowerTypeId } from './towers'
+import type { WaveSchedule } from './waves'
+
+const SPAWN_TIME_EPSILON = 1e-9
+const DISTANCE_EPSILON = 1e-9
 
 export function createSimulationSession(
   level: LevelDefinition = prototypeLevel,
   towerDefinitions: readonly TowerDefinition[] = prototypeTowers,
+  enemyDefinitions: readonly EnemyDefinition[] = prototypeEnemies,
 ): SimulationSession {
   validateLevelDefinition(level)
 
@@ -35,8 +43,8 @@ export function createSimulationSession(
   let projectileId = 0
   let projectiles: readonly ProjectileSnapshot[] = Object.freeze([])
   let wave = 1
-  let spawnedInWave = 0
-  let secondsUntilNextSpawn = 0
+  let waveElapsedSeconds = 0
+  let groupSpawnCounts: readonly number[] = Object.freeze([])
   let baseHealth = level.outcomes.baseHealth
   let outcome: GameOutcome = 'playing'
   const traversal = createRouteTraversal(level)
@@ -99,8 +107,8 @@ export function createSimulationSession(
           projectileId = 0
           projectiles = Object.freeze([])
           wave = 1
-          spawnedInWave = 0
-          secondsUntilNextSpawn = 0
+          waveElapsedSeconds = 0
+          groupSpawnCounts = Object.freeze([])
           baseHealth = level.outcomes.baseHealth
           outcome = 'playing'
           break
@@ -149,10 +157,12 @@ export function createSimulationSession(
         route: routeSnapshot,
         enemies: Object.freeze(enemies.map((enemy) => Object.freeze({
           id: enemy.id,
+          enemyType: enemy.enemyType,
           position: getRoutePosition(level, traversal, enemy.travelledDistance).position,
-          speed: level.enemySpeed * enemySpeedMultiplier(enemy),
+          speed: enemy.baseSpeed * enemySpeedMultiplier(enemy),
           health: enemy.health,
-          maxHealth: level.combat.enemyHealth,
+          maxHealth: enemy.maxHealth,
+          armor: enemy.armor,
           slowRemainingSeconds: enemy.slowRemainingSeconds,
         }))),
         towers: Object.freeze(towers.map((tower) => Object.freeze({
@@ -164,6 +174,7 @@ export function createSimulationSession(
         projectiles,
         lastPlacementRejection,
         wave,
+        waveCount: waveSchedule.length,
         baseHealth,
         outcome,
       })
@@ -171,24 +182,34 @@ export function createSimulationSession(
   }
 
   function spawnDueEnemies(): void {
-    const definition = waveSchedule[wave - 1]
-    if (definition === undefined) return
+    const schedule = waveSchedule[wave - 1]
+    if (schedule === undefined) return
 
-    secondsUntilNextSpawn -= FIXED_STEP_SECONDS
-    while (spawnedInWave < definition.enemyCount && secondsUntilNextSpawn <= 0) {
-      enemies = Object.freeze([
-        ...enemies,
-        Object.freeze({
-          id: ++enemyId,
-          travelledDistance: 0,
-          health: level.combat.enemyHealth,
-          slowRemainingSeconds: 0,
-          slowMultiplier: 1,
-        }),
-      ])
-      spawnedInWave += 1
-      secondsUntilNextSpawn += definition.spawnIntervalSeconds
-      if (definition.spawnIntervalSeconds > 0) break
+    waveElapsedSeconds += FIXED_STEP_SECONDS
+    const spawned: RuntimeEnemy[] = []
+    const spawnCounts = [...groupSpawnCounts]
+
+    for (const [groupIndex, group] of schedule.groups.entries()) {
+      const definition = findEnemyDefinition(enemyDefinitions, group.enemyType)
+      if (definition === undefined) continue
+
+      let spawnedInGroup = spawnCounts[groupIndex] ?? 0
+
+      while (spawnedInGroup < group.count) {
+        const dueAtSeconds = group.startOffsetSeconds + spawnedInGroup * group.spawnIntervalSeconds
+        if (waveElapsedSeconds + SPAWN_TIME_EPSILON < dueAtSeconds) break
+
+        spawned.push(createRuntimeEnemy(++enemyId, group.enemyType, definition))
+        spawnedInGroup += 1
+      }
+
+      spawnCounts[groupIndex] = spawnedInGroup
+    }
+
+    groupSpawnCounts = Object.freeze(spawnCounts)
+
+    if (spawned.length > 0) {
+      enemies = Object.freeze([...enemies, ...spawned])
     }
   }
 
@@ -196,7 +217,7 @@ export function createSimulationSession(
     const nextEnemies: RuntimeEnemy[] = []
     for (const enemy of enemies) {
       const travelledDistance = Math.min(
-        enemy.travelledDistance + level.enemySpeed * enemySpeedMultiplier(enemy) * FIXED_STEP_SECONDS,
+        enemy.travelledDistance + enemy.baseSpeed * enemySpeedMultiplier(enemy) * FIXED_STEP_SECONDS,
         traversal.totalLength,
       )
       if (travelledDistance === traversal.totalLength) {
@@ -217,6 +238,7 @@ export function createSimulationSession(
     const nextProjectiles: ProjectileSnapshot[] = []
     const nextHealth = new Map(enemies.map((enemy) => [enemy.id, enemy.health]))
     const nextSlow = new Map<number, RuntimeSlow>()
+
     for (const projectile of projectiles) {
       const target = enemies.find((enemy) => enemy.id === projectile.targetId)
       if (target === undefined) continue
@@ -224,7 +246,8 @@ export function createSimulationSession(
       const distance = Math.hypot(targetPosition.x - projectile.position.x, targetPosition.y - projectile.position.y)
       const travel = projectile.speed * FIXED_STEP_SECONDS
       if (distance <= travel) {
-        nextHealth.set(target.id, Math.max(0, (nextHealth.get(target.id) ?? 0) - projectile.damage))
+        const damage = resolveDamageAgainstArmor(projectile.damage, target.armor)
+        nextHealth.set(target.id, Math.max(0, (nextHealth.get(target.id) ?? 0) - damage))
         if (projectile.effect.kind === 'slow') {
           nextSlow.set(target.id, {
             slowRemainingSeconds: projectile.effect.durationSeconds,
@@ -241,6 +264,7 @@ export function createSimulationSession(
         }))
       }
     }
+
     enemies = Object.freeze(enemies.flatMap((enemy) => {
       const health = nextHealth.get(enemy.id) ?? enemy.health
       if (health <= 0) return []
@@ -280,7 +304,12 @@ export function createSimulationSession(
       const position = getRoutePosition(level, traversal, enemy.travelledDistance).position
       const distance = Math.hypot(tower.position.x - position.x, tower.position.y - position.y)
       if (distance > tower.stats.range) continue
-      if (distance < closestDistance) {
+      if (closest === undefined || distance < closestDistance - DISTANCE_EPSILON) {
+        closest = enemy
+        closestDistance = distance
+        continue
+      }
+      if (Math.abs(distance - closestDistance) <= DISTANCE_EPSILON && enemy.id < closest.id) {
         closest = enemy
         closestDistance = distance
       }
@@ -290,15 +319,23 @@ export function createSimulationSession(
 
   function resolveWaveOutcome(): void {
     if (phase !== 'running') return
-    const definition = waveSchedule[wave - 1]
-    if (definition !== undefined && spawnedInWave === definition.enemyCount && enemies.length === 0) {
-      if (wave === waveSchedule.length) finish('won')
-      else {
-        wave += 1
-        spawnedInWave = 0
-        secondsUntilNextSpawn = 0
-      }
+    const schedule = waveSchedule[wave - 1]
+    if (schedule === undefined) return
+    if (!areAllGroupsSpawned(schedule) || enemies.length > 0) return
+
+    if (wave === waveSchedule.length) {
+      finish('won')
+      return
     }
+
+    wave += 1
+    waveElapsedSeconds = 0
+    const nextSchedule = waveSchedule[wave - 1]
+    groupSpawnCounts = Object.freeze((nextSchedule?.groups ?? []).map(() => 0))
+  }
+
+  function areAllGroupsSpawned(schedule: WaveSchedule): boolean {
+    return schedule.groups.every((group, index) => (groupSpawnCounts[index] ?? 0) >= group.count)
   }
 
   function finish(nextOutcome: Exclude<GameOutcome, 'playing'>): void {
@@ -306,6 +343,20 @@ export function createSimulationSession(
     phase = nextOutcome
     projectiles = Object.freeze([])
   }
+}
+
+function createRuntimeEnemy(id: number, enemyType: EnemyTypeId, definition: EnemyDefinition): RuntimeEnemy {
+  return Object.freeze({
+    id,
+    enemyType,
+    baseSpeed: definition.speed,
+    travelledDistance: 0,
+    health: definition.health,
+    maxHealth: definition.health,
+    armor: definition.armor,
+    slowRemainingSeconds: 0,
+    slowMultiplier: 1,
+  })
 }
 
 function createRuntimeTower(
@@ -332,8 +383,12 @@ function enemySpeedMultiplier(enemy: RuntimeEnemy): number {
 
 type RuntimeEnemy = Readonly<{
   id: number
+  enemyType: EnemyTypeId
+  baseSpeed: number
   travelledDistance: number
   health: number
+  maxHealth: number
+  armor: number
   slowRemainingSeconds: number
   slowMultiplier: number
 }>
